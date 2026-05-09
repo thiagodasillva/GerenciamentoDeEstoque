@@ -1,7 +1,6 @@
-package com.thiagoRaimundo.controleEstoque.Service;
+package com.thiagoRaimundo.controleEstoque.services;
 
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
-import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.models.SaleItem;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
 import com.thiagoRaimundo.controleEstoque.repository.SaleItemRepository;

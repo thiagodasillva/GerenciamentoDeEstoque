@@ -1,4 +1,4 @@
-package com.thiagoRaimundo.controleEstoque.models.DTOs;
+package com.thiagoRaimundo.controleEstoque.DTOs;
 
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.models.Sale;
@@ -7,15 +7,33 @@ import jakarta.persistence.OneToOne;
 
 import java.math.BigDecimal;
 
-public class SaleItemDTO {
+public class SaleItemResponse {
 
+    private Long id;
     private BigDecimal valorVenda;
     private BigDecimal subTotal;
     private Integer quantidade;
     private Product product;
     private Sale sale;
 
-    public SaleItemDTO() {
+    public SaleItemResponse() {
+    }
+
+    public SaleItemResponse(Long id, BigDecimal valorVenda, BigDecimal subTotal, Integer quantidade, Product product, Sale sale) {
+        this.id = id;
+        this.valorVenda = valorVenda;
+        this.subTotal = subTotal;
+        this.quantidade = quantidade;
+        this.product = product;
+        this.sale = sale;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public BigDecimal getValorVenda() {

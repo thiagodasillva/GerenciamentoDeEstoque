@@ -1,11 +1,10 @@
-package com.thiagoRaimundo.controleEstoque.Service;
+package com.thiagoRaimundo.controleEstoque.services;
 
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,17 +37,10 @@ public class ProductService {
 
 
     @Transactional
-    public HttpStatus DeleteProduct (Long id){
-        Optional<Product> pOps = productRepository.findById(id);
-        if (pOps.isPresent()){
-            Product product = pOps.get();
-            product.setStatus(false);
-
-            productRepository.save(product);
-
-            return HttpStatus.OK;
-        }
-        return HttpStatus.NOT_FOUND;
+    public void DeleteProduct (Long id){
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O Produto informado não existe"));
+        product.setStatus(false);
+        productRepository.save(product);
 
     }
 

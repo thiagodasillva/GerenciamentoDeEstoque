@@ -1,4 +1,4 @@
-package com.thiagoRaimundo.controleEstoque.Service;
+package com.thiagoRaimundo.controleEstoque.services;
 
 import com.thiagoRaimundo.controleEstoque.models.User;
 import com.thiagoRaimundo.controleEstoque.repository.UserRepository;

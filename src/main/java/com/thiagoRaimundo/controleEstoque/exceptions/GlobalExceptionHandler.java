@@ -14,12 +14,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 
+    // Falta construit os tratamentos das outras exceptions não genericas
     private boolean enableTrace = true;
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex, WebRequest request) {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
+
+
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -30,13 +34,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND, request);
     }
-
-
-
-
-
-
-
 
 
 

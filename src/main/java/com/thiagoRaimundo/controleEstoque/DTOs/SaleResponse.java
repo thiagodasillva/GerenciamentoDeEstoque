@@ -1,27 +1,37 @@
-package com.thiagoRaimundo.controleEstoque.models.DTOs;
+package com.thiagoRaimundo.controleEstoque.DTOs;
 
 import com.thiagoRaimundo.controleEstoque.models.SaleItem;
 import com.thiagoRaimundo.controleEstoque.models.User;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-public class SaleRequestDTO {
-
+public class SaleResponse {
+    private Long id;
     private LocalDateTime dataVenda;
     private BigDecimal valorTotal;
     private User user;
-    private Collection<SaleItemDTO> itens;
+    private Collection<SaleItem> itens;
 
-    public SaleRequestDTO(LocalDateTime dataVenda, BigDecimal valorTotal, User user, Collection<SaleItemDTO> itens) {
+
+    public SaleResponse() {
+    }
+
+    public SaleResponse(Long id, LocalDateTime dataVenda, BigDecimal valorTotal, User user, Collection<SaleItem> itens) {
+        this.id = id;
         this.dataVenda = dataVenda;
         this.valorTotal = valorTotal;
         this.user = user;
         this.itens = itens;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalDateTime getDataVenda() {
@@ -48,11 +58,11 @@ public class SaleRequestDTO {
         this.user = user;
     }
 
-    public Collection<SaleItemDTO> getItens() {
+    public Collection<SaleItem> getItens() {
         return itens;
     }
 
-    public void setItens(Collection<SaleItemDTO> itens) {
+    public void setItens(Collection<SaleItem> itens) {
         this.itens = itens;
     }
 }

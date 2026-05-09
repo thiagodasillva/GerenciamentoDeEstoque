@@ -1,9 +1,9 @@
-package com.thiagoRaimundo.controleEstoque.Service;
+package com.thiagoRaimundo.controleEstoque.services;
 
-import com.thiagoRaimundo.controleEstoque.models.DTOs.SaleItemDTO;
+import com.thiagoRaimundo.controleEstoque.DTOs.SaleItemRequest;
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.models.Sale;
-import com.thiagoRaimundo.controleEstoque.models.DTOs.SaleRequestDTO;
+import com.thiagoRaimundo.controleEstoque.DTOs.SaleRequest;
 import com.thiagoRaimundo.controleEstoque.models.SaleItem;
 import com.thiagoRaimundo.controleEstoque.models.User;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
@@ -33,7 +33,7 @@ public class SaleService {
 
 
     @Transactional
-    public Sale realizarVenda(SaleRequestDTO dto) {
+    public Sale realizarVenda(SaleRequest dto) {
 
         User user = userRepository.findById(dto.getUser().getId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -44,7 +44,7 @@ public class SaleService {
 
         BigDecimal total = BigDecimal.ZERO;
 
-        for (SaleItemDTO itemDTO : dto.getItens()) {
+        for (SaleItemRequest itemDTO : dto.getItens()) {
 
             Product product = productRepository.findById(itemDTO.getProduct().getId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado"));

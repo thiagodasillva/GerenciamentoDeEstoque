@@ -1,4 +1,4 @@
-package com.thiagoRaimundo.controleEstoque.Service;
+package com.thiagoRaimundo.controleEstoque.services;
 
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 import com.thiagoRaimundo.controleEstoque.models.Lote;

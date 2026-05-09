@@ -1,10 +1,10 @@
-package com.thiagoRaimundo.controleEstoque.Service;
+package com.thiagoRaimundo.controleEstoque.services;
 
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 import com.thiagoRaimundo.controleEstoque.exceptions.StockNotFoundException;
 import com.thiagoRaimundo.controleEstoque.exceptions.UserNotFoundException;
 import com.thiagoRaimundo.controleEstoque.models.*;
-import com.thiagoRaimundo.controleEstoque.models.DTOs.StockMovementDTO;
+import com.thiagoRaimundo.controleEstoque.DTOs.StockMovementResponse;
 import com.thiagoRaimundo.controleEstoque.models.Enum.TipoStockMoviment;
 import com.thiagoRaimundo.controleEstoque.repository.*;
 import jakarta.transaction.Transactional;
@@ -184,24 +184,24 @@ public class StockMovimentService {
 
 
     // Listar movimentos por produto
-    public Page<StockMovementDTO> listarMovimentosPorProduto(Long productId, Pageable pageable) {
+    public Page<StockMovementResponse> listarMovimentosPorProduto(Long productId, Pageable pageable) {
         return SMRepository.findByProductIdOrderByDataHoraDesc(productId, pageable).map(this::converterParaDTO);
     }
 
     // Listar movimentos por tipo
-    public Page<StockMovementDTO> listarMovimentosPorTipo(TipoStockMoviment tipo, Pageable pageable) {
+    public Page<StockMovementResponse> listarMovimentosPorTipo(TipoStockMoviment tipo, Pageable pageable) {
         return SMRepository.findByTipoOrderByDataHoraDesc(tipo, pageable)
                 .map(this::converterParaDTO);
     }
 
     // Listar movimentos por usuário
-    public Page<StockMovementDTO> listarMovimentosPorUsuario(Long userId, Pageable pageable) {
+    public Page<StockMovementResponse> listarMovimentosPorUsuario(Long userId, Pageable pageable) {
         return SMRepository.findByUserIdOrderByDataHoraDesc(userId, pageable)
                 .map(this::converterParaDTO);
     }
 
     // Listar movimentos em intervalo de datas
-    public List<StockMovementDTO> listarMovimentosPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+    public List<StockMovementResponse> listarMovimentosPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         return SMRepository.findByDataHoraBetween(inicio, fim)
                 .stream()
                 .map(this::converterParaDTO).collect(Collectors.toList());
@@ -218,7 +218,7 @@ public class StockMovimentService {
     }
 
     // Obter histórico completo de um lote
-    public List<StockMovementDTO> obterHistoricoLote(Long batchId) {
+    public List<StockMovementResponse> obterHistoricoLote(Long batchId) {
         return SMRepository.findByLoteIdOrderByDataHoraDesc(batchId)
                 .stream()
                 .map(this::converterParaDTO)
@@ -227,8 +227,8 @@ public class StockMovimentService {
 
 
 
-    private StockMovementDTO converterParaDTO(StockMovement movement) {
-        StockMovementDTO stockMovementDTO = new StockMovementDTO();
+    private StockMovementResponse converterParaDTO(StockMovement movement) {
+        StockMovementResponse stockMovementDTO = new StockMovementResponse();
         stockMovementDTO.setLote(movement.getLote());
         stockMovementDTO.setProduct(movement.getProduct());
         stockMovementDTO.setQuantidade(movement.getQuantidade());

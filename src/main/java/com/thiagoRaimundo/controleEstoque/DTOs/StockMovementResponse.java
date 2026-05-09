@@ -1,16 +1,13 @@
-package com.thiagoRaimundo.controleEstoque.models.DTOs;
+package com.thiagoRaimundo.controleEstoque.DTOs;
 
 import com.thiagoRaimundo.controleEstoque.models.Enum.TipoStockMoviment;
 import com.thiagoRaimundo.controleEstoque.models.Lote;
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.models.User;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
-public class StockMovementDTO {
+public class StockMovementResponse {
 
     private Long id;
     private TipoStockMoviment tipo;
@@ -21,7 +18,27 @@ public class StockMovementDTO {
     private Lote lote;
     private Product product;
 
-    public StockMovementDTO() {
+
+    public StockMovementResponse() {
+    }
+
+    public StockMovementResponse(Long id, TipoStockMoviment tipo, Integer quantidade, String observacao, LocalDateTime dataHora, User user, Lote lote, Product product) {
+        this.id = id;
+        this.tipo = tipo;
+        this.quantidade = quantidade;
+        this.observacao = observacao;
+        this.dataHora = dataHora;
+        this.user = user;
+        this.lote = lote;
+        this.product = product;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public TipoStockMoviment getTipo() {
