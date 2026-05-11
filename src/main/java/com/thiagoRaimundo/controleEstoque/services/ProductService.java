@@ -1,76 +1,92 @@
 package com.thiagoRaimundo.controleEstoque.services;
 
+import com.thiagoRaimundo.controleEstoque.DTOs.ProductRequest;
+import com.thiagoRaimundo.controleEstoque.DTOs.ProductResponse;
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 
 import com.thiagoRaimundo.controleEstoque.models.Product;
+import com.thiagoRaimundo.controleEstoque.repository.CategoryRepository;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-
 @Service
 public class ProductService {
 
     private ProductRepository productRepository;
+    private CategoryRepository categoryRepository;
+    private ModelMapper modelMapper;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
-    public Product getProduct(Long id){
-       return productRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo"));
+    public ProductResponse getProduct(Long idProduct){
+       Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo"));
+       return entityToDto(product);
     }
 
-    public Product getByName(String name){
-        return productRepository.findByName(name).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo"));
+    public ProductResponse getByName(String name){
+        Product product = productRepository.findByNameAndStatusTrue(name).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo"));
+        return entityToDto(product);
     }
 
-    public List<Product> getProducts(){
-        return productRepository.findAll();
+    public List<ProductResponse> getProducts(){
+        return productRepository.findByStatusTrue().stream().map(this::entityToDto).toList();
     }
 
-    public Product CreatProduct(Product p){
-        return productRepository.save(p);
+    public ProductResponse CreatProduct(ProductRequest productRequest){
+        Product product = productRepository.save(DTOToEntity(productRequest));
+        return entityToDto(product);
     }
 
 
     @Transactional
-    public void DeleteProduct (Long id){
-        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O Produto informado não existe"));
+    public void DeleteProduct (Long idProduct){
+        Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(() -> new ResourceNotFoundException("O Produto informado não existe"));
         product.setStatus(false);
         productRepository.save(product);
 
     }
 
-    public Product updateProduct(Product product,Long idProduct){
+    public ProductResponse updateProduct(Long idProduct, ProductRequest productRequest){
+        Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(() -> new ResourceNotFoundException("O produto informado não existe. ID: "+idProduct));
 
-        Optional<Product> pOps = productRepository.findById(idProduct);
-        if (pOps.isPresent()){
-
-            Product p = pOps.get();
-            productRepository.save(productToProduct(p,product));
-
-            return p;
-
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setCategory(productRequest.getCategory());
+        if(productRequest.getLotes() != null){
+            product.setLotes(productRequest.getLotes());
         }
-        throw new ResourceNotFoundException("O produto indormado para atualização não existe");
+
+        productRepository.save(product);
+
+        return entityToDto(product);
 
     }
 
-    public List<Product> listarPorCategoria(Long id){
-        List<Product> proCat = productRepository.findByCategory(id);
-        return proCat;
+    public List<ProductResponse> listarPorCategoria(Long idCategory){
+
+        if(!categoryRepository.existsById(idCategory)){
+            throw new ResourceNotFoundException("A Categoria informada não existe. ID: "+ idCategory);
+        }
+
+        return productRepository.findByCategoryIdAndStatusTrue(idCategory).stream().map(this::entityToDto).toList();
 
     }
 
-    private Product productToProduct(Product a, Product b){
-        a.setName(b.getName());
-        a.setCategory(b.getCategory());
-        a.setDescription(b.getDescription());
-        return a;
 
-
+    private ProductResponse entityToDto(Product product){
+        return modelMapper.map(product, ProductResponse.class);
     }
+
+    private Product DTOToEntity(ProductRequest productRequest){
+        return modelMapper.map(productRequest,Product.class);
+    }
+
+
+
 }

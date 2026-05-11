@@ -1,61 +1,65 @@
 package com.thiagoRaimundo.controleEstoque.services;
 
+import com.thiagoRaimundo.controleEstoque.DTOs.UserRequest;
+import com.thiagoRaimundo.controleEstoque.DTOs.UserResponse;
+import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 import com.thiagoRaimundo.controleEstoque.models.User;
 import com.thiagoRaimundo.controleEstoque.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
 
     private UserRepository userRepository;
+    private ModelMapper modelMapper;
 
     public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+        this.userRepository = userRepository;}
+
+    public UserResponse getUser(Long idUser){
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario informado não existe. ID: "));
+        return entityToDto(user);
+
     }
 
-    public User getUser(Long id){
-        Optional<User> userOpr = userRepository.findById(id);
-        if(userOpr.isPresent()){
-            User user = userOpr.get();
-            if(user.getStatus() == true){
-                return user;
-            }
-            return null;
-        }
-        return null;
+    public List<UserResponse> getUsers(){
+        return userRepository.findByStatusTrue().stream().map(this::entityToDto).toList();
     }
 
-    public Collection<User> getUsers(){
-        return userRepository.findAll();
+    public UserResponse creatUser(UserRequest userRequest){
+        User user = DTOToEntity(userRequest);
+        userRepository.save(user);
+        return entityToDto(user);
     }
 
-    public User creatUser(User u){
-        userRepository.save(u);
-        return u;
-    }
-
-    public void deleteUser(Long id){
-        Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-            user.setStatus(false);
-        }
+    public void deleteLogico(Long idUser){
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario infomado não existe"));
+        user.setStatus(false);
+        userRepository.save(user);
     }
 
 
-    public User updateUser(User u, Long id){
-        Optional<User> userOptional= userRepository.findById(id);
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-            user.setName(u.getName());
-            user.setEmail(u.getEmail());
-            user.setTipoUser(user.getTipoUser());
+    public UserResponse updateUser(Long idUser, UserRequest userRequest){
 
-            return user;
-        }
-        return null;
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario infomado não existe"));
+
+        user.setName(userRequest.getName());
+        user.setEmail(userRequest.getEmail());
+        user.setTipoUser(userRequest.getTipoUser());
+
+        userRepository.save(user);
+        return entityToDto(user);
+    }
+
+
+    private User DTOToEntity(UserRequest userRequest){
+        return modelMapper.map(userRequest, User.class);
+    }
+
+    private UserResponse entityToDto(User user){
+        return modelMapper.map(user, UserResponse.class);
     }
 }

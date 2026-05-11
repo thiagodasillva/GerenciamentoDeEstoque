@@ -1,6 +1,7 @@
 package com.thiagoRaimundo.controleEstoque.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.thiagoRaimundo.controleEstoque.models.User;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
@@ -19,14 +20,14 @@ public class SaleRequest {
     private BigDecimal valorTotal;
 
     @NotNull(message = "Deve ser informado um usuario")
-    private Long user;
+    private User user;
     private Collection<SaleItemRequest> itens;
 
 
     public SaleRequest() {
     }
 
-    public SaleRequest(LocalDateTime dataVenda, BigDecimal valorTotal, Long user, Collection<SaleItemRequest> itens) {
+    public SaleRequest(LocalDateTime dataVenda, BigDecimal valorTotal, User user, Collection<SaleItemRequest> itens) {
         this.dataVenda = dataVenda;
         this.valorTotal = valorTotal;
         this.user = user;
@@ -49,11 +50,11 @@ public class SaleRequest {
         this.valorTotal = valorTotal;
     }
 
-    public Long getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(Long user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

@@ -1,23 +1,29 @@
 package com.thiagoRaimundo.controleEstoque.services;
 
+import com.thiagoRaimundo.controleEstoque.DTOs.LoteRequest;
+import com.thiagoRaimundo.controleEstoque.DTOs.LoteResponse;
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 import com.thiagoRaimundo.controleEstoque.models.Lote;
 import com.thiagoRaimundo.controleEstoque.exceptions.LoteNotFoundException;
-import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.repository.LoteRepository;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
+import org.modelmapper.ModelMapper;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class LoteService {
 
     private LoteRepository loteRepository;
     private ProductRepository productRepository;
+    private ModelMapper modelMapper;
+    private static final Logger log = (Logger) LoggerFactory.getLogger(LoteService.class);
+
 
     public LoteService(LoteRepository loteRepository, ProductRepository productRepository) {
         this.loteRepository = loteRepository;
@@ -27,59 +33,72 @@ public class LoteService {
 
     // CRUD, validar datas
 
-    public Lote creatLote(Lote l){
+    public LoteResponse creatLote(LoteRequest loteRequest){
 
-        if(l.getValidate().isBefore(LocalDate.now())){
-            throw new RuntimeException("Data de validade não pode ser no passado");
+        if(loteRequest.getValidate().isBefore(LocalDate.now())){
+            throw new RuntimeException("Data de validade não pode ser no passado"); // mudar para um exception tratado
         }
-        Product product = productRepository.findById(l.getProduct().getId()).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrado"));
-
-
-        return loteRepository.save(l);
-
-    }
-
-    public Collection<Lote> getLotes(){
-        return loteRepository.findAll();
-    }
-    public Lote getLote(Long idLote){
-        Optional<Lote> l = loteRepository.findById(idLote);
-        if(l.isPresent()){
-            return l.get();
-        }
-        throw new LoteNotFoundException("Não foi possivel encontrar os lotes");
-
-    }
-
-    public List<Lote> buscarProductOrderByValidade(Long id){
-        Product p = productRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Produto não consta no cadastro"));
-        return loteRepository.findByProductIdOrderByDataValidadeAsc(p.getId());
-
-    }
-
-    public void deleteLote (Long idLote){
-        Optional<Lote> lOpt = loteRepository.findById(idLote);
-        if (lOpt.isPresent()){
-            Lote lote = lOpt.get();
-            lote.setStatus(false);
-            loteRepository.save(lote);
+        if(!productRepository.existsById(loteRequest.getProduct().getId())){
+            throw new ResourceNotFoundException("Produto não encontrado. ID: "+ loteRequest.getProduct().getId());
         }
 
+        Lote lote = dtoToEntity(loteRequest);
+        loteRepository.save(lote);
+
+        return entityToDTO(lote);
+
     }
 
-    public Lote updateLote(Lote l, Long id){
-        Optional<Lote> lOpt = loteRepository.findById(id);
-        if(lOpt.isPresent()){
-            Lote lote = lOpt.get();
-            lote.setQuantAtual(l.getQuantAtual());
-            lote.setProduct(l.getProduct());
-            lote.setValidate(l.getValidate());
-            loteRepository.save(lote);
-            return lote;
+    public List<LoteResponse> getLotes(){
 
+        return loteRepository.findByStatusTrue().stream().map(this:: entityToDTO).collect(Collectors.toList());
+    }
+
+
+    public LoteResponse getLote(Long idLote){
+        Lote lote = loteRepository.findByIdAndStatusTrue(idLote).orElseThrow(() -> new LoteNotFoundException("Não Foi encontrado nenhum lote com o ID: "+ idLote));
+        return entityToDTO(lote);
+    }
+
+
+    public List<LoteResponse> buscarLotesDeProdutosOrdenadosPorDataDeValidade(Long id){
+        if(!productRepository.existsById(id)){
+            throw new ResourceNotFoundException("O produto não encontrado. ID: "+ id );
         }
 
-        throw new RuntimeException("O id informado não corresponde a nenhum lote existente ");
+        return loteRepository.findByProductIdAndStatusTrueOrderByDataValidadeAsc(id).stream().map(this::entityToDTO).toList();
+
+    }
+
+    public void deleteLogicoDeLote (Long idLote){
+        Lote lote = loteRepository.findByIdAndStatusTrue(idLote).orElseThrow(()-> new ResourceNotFoundException("Lote não encontrado. ID: "+ idLote));
+        lote.setStatus(false);
+        loteRepository.save(lote);
+    }
+
+    public LoteResponse updateLote(Long idLote, LoteRequest loteRequest){
+        Lote lote = loteRepository.findByIdAndStatusTrue(idLote).orElseThrow(()-> new ResourceNotFoundException("Lote não encontrado. ID: "+ idLote));
+
+        if(!productRepository.existsById(lote.getProduct().getId())){
+            throw new ResourceNotFoundException("O produto informado no lote não existe. Id Produto: "+ loteRequest.getProduct().getId());
+        }
+
+        lote.setQuantAtual(loteRequest.getQuantAtual());
+        lote.setProduct(loteRequest.getProduct());
+        lote.setValidate(loteRequest.getValidate());
+        loteRepository.save(lote);
+
+        return entityToDTO(lote);
+    }
+
+
+    private Lote dtoToEntity(LoteRequest request){
+        return modelMapper.map(request, Lote.class);
+    }
+
+    private LoteResponse entityToDTO(Lote lote){
+        return modelMapper.map(lote, LoteResponse.class);
+
     }
 
 

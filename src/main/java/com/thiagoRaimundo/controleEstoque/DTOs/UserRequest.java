@@ -2,11 +2,9 @@ package com.thiagoRaimundo.controleEstoque.DTOs;
 
 import com.thiagoRaimundo.controleEstoque.models.Enum.TipoUser;
 import com.thiagoRaimundo.controleEstoque.models.StockMovement;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.NonNull;
 
 import java.util.Collection;
 

@@ -1,12 +1,13 @@
 package com.thiagoRaimundo.controleEstoque.DTOs;
 
+import com.thiagoRaimundo.controleEstoque.models.Product;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public class StockRequest {
 
     @NotNull(message = "O produto do estoque a ser criado deve ser informado")
-    private Long product;
+    private Product product;
     @NotNull(message = "a quantidade atual ao criar o produto deve ser informado")
     @Min(value = 0)
     private Integer quantidadeAtual;
@@ -15,7 +16,7 @@ public class StockRequest {
     private Integer quantidadeMinima;
     private Integer quantidadeMaxima;
 
-    public StockRequest(Long product, Integer quantidadeAtual, Integer quantidadeMinima, Integer quantidadeMaxima) {
+    public StockRequest(Product product, Integer quantidadeAtual, Integer quantidadeMinima, Integer quantidadeMaxima) {
         this.product = product;
         this.quantidadeAtual = quantidadeAtual;
         this.quantidadeMinima = quantidadeMinima;
@@ -25,12 +26,11 @@ public class StockRequest {
     public StockRequest() {
     }
 
-
-    public Long getProduct() {
+    public Product getProduct() {
         return product;
     }
 
-    public void setProduct(Long product) {
+    public void setProduct(Product product) {
         this.product = product;
     }
 

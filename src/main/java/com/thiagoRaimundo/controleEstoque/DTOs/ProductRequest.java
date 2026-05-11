@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.DTOs;
 
+import com.thiagoRaimundo.controleEstoque.models.Category;
 import com.thiagoRaimundo.controleEstoque.models.Lote;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,14 +17,14 @@ public class ProductRequest {
     @Size(max = 500)
     private String Description;
     @NotNull
-    private Long category;
+    private Category category;
 
     private Collection<Lote> lotes;
 
     public ProductRequest() {
     }
 
-    public ProductRequest(String name, String description, Long category, Collection<Lote> lotes) {
+    public ProductRequest(String name, String description, Category category, Collection<Lote> lotes) {
         this.name = name;
         Description = description;
         this.category = category;
@@ -46,11 +47,11 @@ public class ProductRequest {
         Description = description;
     }
 
-    public Long getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(Long category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 

@@ -1,5 +1,7 @@
 package com.thiagoRaimundo.controleEstoque.DTOs;
 
+import com.thiagoRaimundo.controleEstoque.models.Product;
+import com.thiagoRaimundo.controleEstoque.models.Sale;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -17,20 +19,20 @@ public class SaleItemRequest {
     private BigDecimal subTotal;
 
     @NotNull
-    @Min(value = 1,message = "Uma venda deve ter ao menos um produto")
+    @Min(value = 1,message = "A Quantidade do item deve ser maior que 0")
     private Integer quantidade;
 
 
     @NotNull
-    private Long product;
+    private Product product;
 
     @NotNull
-    private Long sale;
+    private Sale sale;
 
     public SaleItemRequest() {
     }
 
-    public SaleItemRequest(BigDecimal valorVenda, BigDecimal subTotal, Integer quantidade, Long product, Long sale) {
+    public SaleItemRequest(BigDecimal valorVenda, BigDecimal subTotal, Integer quantidade, Product product, Sale sale) {
         this.valorVenda = valorVenda;
         this.subTotal = subTotal;
         this.quantidade = quantidade;
@@ -62,19 +64,19 @@ public class SaleItemRequest {
         this.quantidade = quantidade;
     }
 
-    public Long getProduct() {
+    public Product getProduct() {
         return product;
     }
 
-    public void setProduct(Long product) {
+    public void setProduct(Product product) {
         this.product = product;
     }
 
-    public Long getSale() {
+    public Sale getSale() {
         return sale;
     }
 
-    public void setSale(Long sale) {
+    public void setSale(Sale sale) {
         this.sale = sale;
     }
 }

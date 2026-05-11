@@ -2,6 +2,9 @@ package com.thiagoRaimundo.controleEstoque.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thiagoRaimundo.controleEstoque.models.Enum.TipoStockMoviment;
+import com.thiagoRaimundo.controleEstoque.models.Lote;
+import com.thiagoRaimundo.controleEstoque.models.Product;
+import com.thiagoRaimundo.controleEstoque.models.User;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -25,26 +28,26 @@ public class StockMoevementRequest {
     private LocalDateTime dataHora;
 
     @NotNull(message = "um usuario deve ser informado")
-    private Long userId;
+    private User user;
 
     @NotNull(message = "O lote que foi movimentado deve ser informado")
-    private Long loteId;
+    private Lote lote;
 
     @NotNull(message = "O produto que voi movimentado deve ser informado")
-    private Long productId;
+    private Product product;
 
 
     public StockMoevementRequest() {
     }
 
-    public StockMoevementRequest(TipoStockMoviment tipo, Integer quantidade, String observacao, LocalDateTime dataHora, Long userId, Long loteId, Long productId) {
+    public StockMoevementRequest(TipoStockMoviment tipo, Integer quantidade, String observacao, LocalDateTime dataHora, User user, Lote lote, Product product) {
         this.tipo = tipo;
         this.quantidade = quantidade;
         this.observacao = observacao;
         this.dataHora = dataHora;
-        this.userId = userId;
-        this.loteId = loteId;
-        this.productId = productId;
+        this.user = user;
+        this.lote = lote;
+        this.product = product;
     }
 
     public TipoStockMoviment getTipo() {
@@ -79,27 +82,27 @@ public class StockMoevementRequest {
         this.dataHora = dataHora;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public Long getLoteId() {
-        return loteId;
+    public Lote getLote() {
+        return lote;
     }
 
-    public void setLoteId(Long loteId) {
-        this.loteId = loteId;
+    public void setLote(Lote lote) {
+        this.lote = lote;
     }
 
-    public Long getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }
