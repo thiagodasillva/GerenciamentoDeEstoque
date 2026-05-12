@@ -5,9 +5,7 @@ import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "tb_sale")
@@ -20,7 +18,9 @@ public class Sale {
     @ManyToOne
     private User user;
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
-    private Collection<SaleItem> itens;
+    private Set<SaleItem> itens = new HashSet<>();
+
+    private Boolean status = true;
 
     public Sale() {
     }
@@ -54,11 +54,23 @@ public class Sale {
         this.user = user;
     }
 
-    public Collection<SaleItem> getItens() {
+    public Set<SaleItem> getItens() {
         return itens;
     }
 
-    public void setItens(Collection<SaleItem> itens) {
+    public void setItens(Set<SaleItem> itens) {
         this.itens = itens;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 }

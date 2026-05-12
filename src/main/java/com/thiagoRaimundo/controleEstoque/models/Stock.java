@@ -3,6 +3,9 @@ package com.thiagoRaimundo.controleEstoque.models;
 import jakarta.persistence.*;
 import org.springframework.context.annotation.EnableMBeanExport;
 
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -20,6 +23,10 @@ public class Stock {
     private Integer quantidadeAtual;
     private Integer quantidadeMinima;
     private Integer quantidadeMaxima;
+    private Boolean status;
+    private LocalDateTime daleteAt;
+    private String deleteBy;
+    private String deleteReason;
     @Version
     private Long version;
 
@@ -61,6 +68,42 @@ public class Stock {
 
     public void setQuantidadeMaxima(Integer quantidadeMaxima) {
         this.quantidadeMaxima = quantidadeMaxima;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getDaleteAt() {
+        return daleteAt;
+    }
+
+    public void setDaleteAt(LocalDateTime daleteAt) {
+        this.daleteAt = daleteAt;
+    }
+
+    public String getDeleteBy() {
+        return deleteBy;
+    }
+
+    public void setDeleteBy(String deleteBy) {
+        this.deleteBy = deleteBy;
+    }
+
+    public String getDeleteReason() {
+        return deleteReason;
+    }
+
+    public void setDeleteReason(String deleteReason) {
+        this.deleteReason = deleteReason;
     }
 
     @Override

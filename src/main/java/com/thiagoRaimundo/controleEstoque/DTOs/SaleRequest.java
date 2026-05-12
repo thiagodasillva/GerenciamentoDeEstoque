@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Set;
 
 public class SaleRequest {
 
@@ -21,13 +22,13 @@ public class SaleRequest {
 
     @NotNull(message = "Deve ser informado um usuario")
     private User user;
-    private Collection<SaleItemRequest> itens;
+    private Set<SaleItemRequest> itens;
 
 
     public SaleRequest() {
     }
 
-    public SaleRequest(LocalDateTime dataVenda, BigDecimal valorTotal, User user, Collection<SaleItemRequest> itens) {
+    public SaleRequest(LocalDateTime dataVenda, BigDecimal valorTotal, User user, Set<SaleItemRequest> itens) {
         this.dataVenda = dataVenda;
         this.valorTotal = valorTotal;
         this.user = user;
@@ -58,11 +59,11 @@ public class SaleRequest {
         this.user = user;
     }
 
-    public Collection<SaleItemRequest> getItens() {
+    public Set<SaleItemRequest> getItens() {
         return itens;
     }
 
-    public void setItens(Collection<SaleItemRequest> itens) {
+    public void setItens(Set<SaleItemRequest> itens) {
         this.itens = itens;
     }
 }
