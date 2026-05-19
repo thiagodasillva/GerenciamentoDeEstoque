@@ -18,6 +18,12 @@ public class Lote {
     private LocalDate validate;
     private Boolean status = true;
 
+    public Lote(Product product, Integer quantAtual, LocalDate validate) {
+        this.product = product;
+        this.quantAtual = quantAtual;
+        this.validate = validate;
+    }
+
     public Lote() {
     }
 

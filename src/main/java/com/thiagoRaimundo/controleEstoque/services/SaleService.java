@@ -4,11 +4,8 @@ import com.thiagoRaimundo.controleEstoque.DTOs.SaleItemRequest;
 import com.thiagoRaimundo.controleEstoque.DTOs.SaleItemResponse;
 import com.thiagoRaimundo.controleEstoque.DTOs.SaleResponse;
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
-import com.thiagoRaimundo.controleEstoque.models.Product;
-import com.thiagoRaimundo.controleEstoque.models.Sale;
+import com.thiagoRaimundo.controleEstoque.models.*;
 import com.thiagoRaimundo.controleEstoque.DTOs.SaleRequest;
-import com.thiagoRaimundo.controleEstoque.models.SaleItem;
-import com.thiagoRaimundo.controleEstoque.models.User;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
 import com.thiagoRaimundo.controleEstoque.repository.SaleItemRepository;
 import com.thiagoRaimundo.controleEstoque.repository.SaleRepository;
@@ -41,11 +38,11 @@ public class SaleService {
         this.saleItemRepository = saleItemRepository;
     }
 
-    public SaleResponse creatSale(SaleRequest saleRequest){
-        Sale sale = DTOToEntity(saleRequest);
-        saleRepository.save(sale);
-        return entityToDTO(sale);
-    }
+    /* funções da sale : realizar a venda acessando a função especifica do movimentação de estoque
+        relatrio de todas as vendas, filtrada por data,
+        relatorio do valor arrecadado no geral e por data especidica,
+    */
+
 
     public SaleResponse getSaleById(Long idSale){
         Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("Venda não Encontrada. ID: "+idSale));
@@ -53,44 +50,33 @@ public class SaleService {
     }
 
     public List<SaleResponse> getSales(){
-        return saleRepository.findByStatusTrue().stream().map(this::entityToDTO).toList();
+        return saleRepository.findByStatusTrue().stream().map(this::entityToDTO).collect(Collectors.toList());
     }
 
-    // pesquisar por data
-
-    //pesquisar por valor
-
-    public SaleResponse updateSale(Long idSale, SaleRequest saleRequest){
-
-        Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("Venda não Encontrada. ID: "+idSale));
-
-        if(!userRepository.existsById(saleRequest.getUser().getId())){
-            throw new ResourceNotFoundException("o usuario Informado não existe. ID: "+ saleRequest.getUser().getId());
-        }
-        sale.setDataVenda(saleRequest.getDataVenda());
-        sale.setUser(saleRequest.getUser());
-        sale.setValorTotal(saleRequest.getValorTotal());
-        saleRepository.save(sale);
-
-        return entityToDTO(sale);
-
+    // buscar por periodo
+    public List<SaleResponse> getSalesPerPeriods(LocalDateTime inicio, LocalDateTime fim){
+        return saleRepository.findAllByDataVendaBeetwen(inicio,fim).stream().map(this::entityToDTO).collect(Collectors.toList());
     }
 
-    // incluir metodo de Acrescentar itens a lista, remover itens da lista
+    // buscar por margem de valor da venda
+    public List<SaleResponse> getValueMargin(BigDecimal intialMargin, BigDecimal finalMargin){
+        return saleRepository.findAllByValorTotalBeetwen(intialMargin, finalMargin).stream().map(this::entityToDTO).collect(Collectors.toList());
+    }
+
 
     public void delete(Long idSale){
         Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("Venda não Encontrada. ID: "+idSale));
         //incluir função para guardar dados do usuario que apagou
         sale.setStatus(false);
+        saleRepository.save(sale);
 
     }
 
-
-    // analisar esse metodo depois
+    //creatCorreto
     @Transactional
-    public Sale realizarVenda(SaleRequest dto) {
+    public SaleResponse realizarVendaFEFO(Long idUser, SaleRequest dto) {
 
-        User user = userRepository.findById(dto.getUser().getId())
+        User user = userRepository.findById(idUser)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         Sale sale = new Sale();
@@ -102,9 +88,9 @@ public class SaleService {
         for (SaleItemRequest itemDTO : dto.getItens()) {
 
             Product product = productRepository.findById(itemDTO.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado. ID: "+ itemDTO.getProduct().getId()));
 
-            stockMovimentService.consumoFEFO(product, itemDTO.getQuantidade(), user);
+            stockMovimentService.consumoItensFEFO(product.getId(), itemDTO.getQuantidade(), user);
 
             SaleItem item = new SaleItem();
             item.setSale(sale);
@@ -122,9 +108,149 @@ public class SaleService {
         }
 
         sale.setValorTotal(total);
+        saleRepository.save(sale);
 
-        return saleRepository.save(sale);
+        return entityToDTO(sale);
     }
+
+
+    public SaleResponse updateSale(Long idStockMovimentacso, SaleRequest saleRequest, User user){
+
+        StockMovement stockMovement = stockMovimentService.
+        if(!userRepository.existsById(user.getId())){
+            throw new ResourceNotFoundException("o usuario Informado não existe. ID: "+ saleRequest.getUser().getId());
+        }
+
+        sale.setDataVenda(saleRequest.getDataVenda());
+        sale.setUser(saleRequest.getUser());
+        sale.setValorTotal(saleRequest.getValorTotal());
+        sale.getItens().clear();
+
+        saleRepository.save(sale);
+
+        return entityToDTO(sale);
+
+    }
+
+    private void processaNovosItens(Sale sale, SaleRequest saleRequest, User user){
+
+        Map<Long, SaleItem> itensAtuais = sale.getItens().stream() .collect(Collectors.toMap( i -> i.getProduct().getId(), i -> i));
+
+        Map<Long, Integer> novosItens = saleRequest.getItens().stream().collect(Collectors.toMap(i -> i.getProduct().getId(), i -> i.getQuantidade()));
+
+        Map<Long,Integer> deveDevolver = new HashMap<>();
+
+        //produto presentes em ambas as listas
+        for(Map.Entry<Long,Integer> entry : novosItens.entrySet()){
+            Long idProduct = entry.getKey();
+            Integer quant = entry.getValue();
+            SaleItem itemAtual = itensAtuais.get(idProduct);
+
+            if(!itensAtuais.isEmpty()){
+                int diferenca = quant - itemAtual.getQuantidade();
+
+                if (diferenca > 0){
+                    stockMovimentService.consumoItensFEFO(idProduct,diferenca,user)
+                } else if (diferenca < 0) {
+                    deveDevolver.put(itemAtual.getId(),idProduct.intValue());
+                }
+
+                itemAtual.setQuantidade(quant);
+
+            }
+
+        }
+
+
+        for(Map.Entry<Long,Integer> entry : novosItens.entrySet()){
+            Long idProduct = entry.getKey();
+            Integer quant = entry.getValue();
+
+
+            if(!itensAtuais.containsKey(idProduct)){
+
+                Product product = productRepository.findByIdAndStatusTrue(idProduct)
+                        .orElseThrow(()-> new ResourceNotFoundException("Produto informado na lista não Existe. ID: "+idProduct));
+
+
+                SaleItemRequest saleItemRequest = saleRequest.getItens().stream().filter(i -> i.getProduct().getId().equals(idProduct)).findFirst().orElseThrow(()-> new IllegalArgumentException("Erro no registro de um novo item da lista no metodo de atualizar compra"));
+
+                stockMovimentService.consumoItensFEFO(idProduct,quant,user);
+
+                SaleItem saleItem =new SaleItem();
+                saleItem.setProduct(product);
+                saleItem.setQuantidade(quant);
+                saleItem.setValorVenda(saleItemRequest.getValorVenda());
+                saleItem.setSubTotal(saleItemRequest.getSubTotal());
+                saleItem.setSale(sale);
+
+                sale.getItens().add(saleItem);
+            }
+        }
+
+
+        for(Map.Entry<Long,SaleItem> entry: itensAtuais.entrySet()){
+            Long productId = entry.getKey();
+            SaleItem itemAtual = entry.getValue();
+
+            if (!novosItens.containsKey(productId)) {
+                int quantidadeDevolver = itemAtual.getQuantidade();
+
+                deveDevolver.put(productId,quantidadeDevolver);
+                sale.getItens().remove(itemAtual);
+            }
+
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+//    public SaleResponse atualizarVenda(Long idSale, SaleRequest saleRequest){
+//
+//        Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("A venda informada não existe, ID:"+ idSale ));
+//
+//        User user = userRepository.findById(saleRequest.getUser().getId())
+//                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+//        for(SaleItemRequest item: saleRequest.getItens()){
+//            Product product = productRepository.findByIdAndStatusTrue(item.getProduct().getId()).orElseThrow(() -> new ResourceNotFoundException("O produto item infomrado não condiz com nenhum produto. ID: "+item.toString()));
+//
+//            //alterar a quantidade de itens que estão na lista em ambas as listas
+//            int quant = item.getQuantidade() - (int)sale.getItens().stream().filter(p-> p.getProduct().equals(product)).count();
+//
+//            if(quant<0){
+//                stockMovimentService.consumoFEFO(product,quant, user);
+//                item.setQuantidade(item.getQuantidade()-quant);
+//            } else if (quant>0) {
+//                //função para retornar itens ao estoque
+//                item.setQuantidade(item.getQuantidade()+quant);
+//            }
+//
+//
+//
+//        }
+//
+//
+//
+//    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

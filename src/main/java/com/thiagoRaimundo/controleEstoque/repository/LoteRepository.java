@@ -5,6 +5,7 @@ import org.hibernate.query.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.awt.print.Pageable;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,8 @@ public interface LoteRepository extends JpaRepository<Lote,Long> {
     Optional<Lote> findByIdAndStatusTrue(Long productId);
 
     Optional<Lote> findByProdut(Long id);
+
+    Optional<Lote> findByValidate(LocalDate validate);
 
 
     //Page<Lote> findByStatusTrue(Pageable pageable);
