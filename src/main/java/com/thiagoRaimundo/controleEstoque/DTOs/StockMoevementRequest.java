@@ -1,10 +1,8 @@
 package com.thiagoRaimundo.controleEstoque.DTOs;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thiagoRaimundo.controleEstoque.models.Enum.TipoStockMoviment;
 import com.thiagoRaimundo.controleEstoque.models.Lote;
 import com.thiagoRaimundo.controleEstoque.models.Product;
-import com.thiagoRaimundo.controleEstoque.models.User;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,13 +21,6 @@ public class StockMoevementRequest {
     @Size(max = 200)
     private String observacao;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    @NotNull(message = "A data da movimentação deve ser informada")
-    private LocalDateTime dataHora;
-
-    @NotNull(message = "um usuario deve ser informado")
-    private User user;
-
     @NotNull(message = "O lote que foi movimentado deve ser informado")
     private Lote lote;
 
@@ -40,12 +31,10 @@ public class StockMoevementRequest {
     public StockMoevementRequest() {
     }
 
-    public StockMoevementRequest(TipoStockMoviment tipo, Integer quantidade, String observacao, LocalDateTime dataHora, User user, Lote lote, Product product) {
+    public StockMoevementRequest(TipoStockMoviment tipo, Integer quantidade, String observacao, Lote lote, Product product) {
         this.tipo = tipo;
         this.quantidade = quantidade;
         this.observacao = observacao;
-        this.dataHora = dataHora;
-        this.user = user;
         this.lote = lote;
         this.product = product;
     }
@@ -72,22 +61,6 @@ public class StockMoevementRequest {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
-    }
-
-    public LocalDateTime getDataHora() {
-        return dataHora;
-    }
-
-    public void setDataHora(LocalDateTime dataHora) {
-        this.dataHora = dataHora;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Lote getLote() {

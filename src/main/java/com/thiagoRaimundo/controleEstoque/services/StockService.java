@@ -3,8 +3,10 @@ package com.thiagoRaimundo.controleEstoque.services;
 import com.thiagoRaimundo.controleEstoque.DTOs.StockResponse;
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 import com.thiagoRaimundo.controleEstoque.DTOs.StockRequest;
+import com.thiagoRaimundo.controleEstoque.exceptions.UserNotFoundException;
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.models.Stock;
+import com.thiagoRaimundo.controleEstoque.models.User;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
 import com.thiagoRaimundo.controleEstoque.repository.StockRepository;
 import com.thiagoRaimundo.controleEstoque.repository.UserRepository;
@@ -33,8 +35,15 @@ public class StockService {
     }
 
 
-    public StockResponse creatStock(StockRequest stockRequest){
-        Product product = productRepository.findById(stockRequest.getProduct().getId()).orElseThrow(()-> new ResourceNotFoundException("Produto informado não existe. ID: "+stockRequest.getProduct().getId()));
+    public StockResponse creatStock(StockRequest stockRequest, Long idUser){
+
+        if(userRepository.existsById(idUser)){
+            throw new UserNotFoundException("O usuario informado não foiencontrado. ID: "+ idUser);
+        }
+        if(!productRepository.existsByIdAndStatusTrue(stockRequest.getProduct().getId())){
+            throw new ResourceNotFoundException("O Produto informado não existe para atualização. ID :"+ stockRequest.getProduct().getId());
+        }
+
         Stock stock = DTOToEntity(stockRequest);
         stockRepository.save(stock);
         return entityToDto(stock);
@@ -62,9 +71,13 @@ public class StockService {
         return stockRepository.findAll().stream().map(this::entityToDto).toList();
     }
 
-    public StockResponse updateStock(Long idStock, StockRequest stockRequest){
+    public StockResponse updateStock(Long idStock, StockRequest stockRequest, Long idUser){
 
         Stock stock = stockRepository.findById(idStock).orElseThrow(()-> new ResourceNotFoundException("O Stock informado não existe. ID :"+ idStock));
+
+        if(userRepository.existsById(idUser)){
+            throw new UserNotFoundException("O usuario informado não foiencontrado. ID: "+ idUser);
+        }
 
         if(!productRepository.existsByIdAndStatusTrue(stockRequest.getProduct().getId())){
             throw new ResourceNotFoundException("O Produto informado não existe para atualização. ID :"+ stockRequest.getProduct().getId());
@@ -80,16 +93,16 @@ public class StockService {
 
     }
 
-    public void deleteLogfico(Long idStock, String motivo){
+    public void deleteLogico(Long idStock, Long idUser){
+
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
 
         Stock stock = stockRepository.findByIdAndStatusTrue(idStock).orElseThrow(()-> new ResourceNotFoundException("O Stock informado não existe. ID :"+ idStock));
         stock.setStatus(false);
         stock.setDaleteAt(LocalDateTime.now());
-        stock.setDeleteReason(motivo);
+        stock.setDeleteBy(user.getEmail());
 
         stockRepository.save(stock);
-
-        //desenvolver a logica de verificação de usuario valido
     }
 
 

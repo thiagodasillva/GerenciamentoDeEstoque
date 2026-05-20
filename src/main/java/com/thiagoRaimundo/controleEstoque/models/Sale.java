@@ -19,8 +19,10 @@ public class Sale {
     private User user;
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
     private Set<SaleItem> itens = new HashSet<>();
-
     private Boolean status = true;
+
+    private LocalDateTime daleteAt;
+    private String deleteBy;
 
     public Sale() {
     }
@@ -73,4 +75,21 @@ public class Sale {
     public void setStatus(Boolean status) {
         this.status = status;
     }
+
+    public LocalDateTime getDaleteAt() {
+        return daleteAt;
+    }
+
+    public void setDaleteAt(LocalDateTime daleteAt) {
+        this.daleteAt = daleteAt;
+    }
+
+    public String getDeleteBy() {
+        return deleteBy;
+    }
+
+    public void setDeleteBy(String deleteBy) {
+        this.deleteBy = deleteBy;
+    }
+
 }

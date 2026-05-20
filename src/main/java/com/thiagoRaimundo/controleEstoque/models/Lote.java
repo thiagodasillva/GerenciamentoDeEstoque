@@ -3,7 +3,6 @@ package com.thiagoRaimundo.controleEstoque.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -14,14 +13,18 @@ public class Lote {
     private Long id;
     @ManyToOne
     private Product product;
-    private Integer quantAtual;
+    private Integer quantProdutos;
+    private String codigo;
     private LocalDate validate;
     private Boolean status = true;
 
-    public Lote(Product product, Integer quantAtual, LocalDate validate) {
+    public Lote(Long id, Product product, Integer quantProdutos, String codigo, LocalDate validate, Boolean status) {
+        this.id = id;
         this.product = product;
-        this.quantAtual = quantAtual;
+        this.quantProdutos = quantProdutos;
+        this.codigo = codigo;
         this.validate = validate;
+        this.status = status;
     }
 
     public Lote() {
@@ -29,6 +32,10 @@ public class Lote {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Product getProduct() {
@@ -39,12 +46,20 @@ public class Lote {
         this.product = product;
     }
 
-    public Integer getQuantAtual() {
-        return quantAtual;
+    public Integer getQuantProdutos() {
+        return quantProdutos;
     }
 
-    public void setQuantAtual(Integer quantAtual) {
-        this.quantAtual = quantAtual;
+    public void setQuantProdutos(Integer quantProdutos) {
+        this.quantProdutos = quantProdutos;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     public LocalDate getValidate() {
@@ -66,8 +81,8 @@ public class Lote {
     @Override
     public String toString() {
         return "Lote{" +
-                "produto=" + product +
-                ", quantAtual=" + quantAtual +
+                "id=" + id +
+                ", quantProdutos=" + quantProdutos +
                 ", validate=" + validate +
                 ", status=" + status +
                 '}';

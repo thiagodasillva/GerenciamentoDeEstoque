@@ -15,7 +15,7 @@ public interface SaleRepository extends JpaRepository<Sale,Long> {
 
     List<Sale> findByStatusTrue();
 
-    List<Sale> findAllByDataVendaBeetwen(LocalDateTime inicio, LocalDateTime fim);
+    List<Sale> findAllByDataVendaBetween(LocalDateTime inicio, LocalDateTime fim);
 
-    List<Sale> findAllByValorTotalBeetwen(BigDecimal valorInicial, BigDecimal valorFinal);
+    List<Sale> findAllByValorTotalBetween(BigDecimal valorInicial, BigDecimal valorFinal);
 }

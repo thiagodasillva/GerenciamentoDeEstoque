@@ -46,7 +46,7 @@ public class StockMovimentService {
 
 
     @Transactional
-    public StockMovementResponse entradaItens(Lote lote, Long idUser) {
+    public StockMovementResponse entradaItens(Lote lote, Long idUser,int quantidade) {
 
         User u = userRepository.findById(idUser).orElseThrow(() -> new UserNotFoundException("Usuario não foi encontrado. ID: " + idUser));
         Product product = productRepository.findByIdAndStatusTrue(lote.getProduct().getId()).orElseThrow(() -> new ResourceNotFoundException("Produto Informado Não Cadastrado:" + lote.getProduct().getId()));
@@ -61,9 +61,8 @@ public class StockMovimentService {
         StockMovement stockMovement = new StockMovement();
         stockMovement.setProduct(product);
         stockMovement.setUser(u);
-        stockMovement.setLote(lote);
         stockMovement.setTipo(TipoStockMoviment.COMPRA);
-        stockMovement.setQuantidade(lote.getQuantAtual());
+        stockMovement.setQuantidade(quantidade);
         stockMovement.setDataHora(LocalDateTime.now());
 
         SMRepository.save(stockMovement);
@@ -88,14 +87,14 @@ public class StockMovimentService {
         for (Lote lote : lotes) {
             if (restantes <= 0) break;
 
-            int disponivel = lote.getQuantAtual();
+            int disponivel = lote.getQuantProdutos();
 
             if (disponivel <= 0) continue;
 
             int retirada = Math.min(disponivel, restantes); // define quanto retirar do lote
 
 
-            lote.setQuantAtual(disponivel - retirada);
+            lote.setQuantProdutos(disponivel - retirada);
             loteRepository.save(lote);
 
             stock.setQuantidadeAtual(stock.getQuantidadeAtual() - retirada);
@@ -103,7 +102,6 @@ public class StockMovimentService {
 
             StockMovement movement = new StockMovement();
             movement.setProduct(product);
-            movement.setLote(lote);
             movement.setUser(user);
             movement.setTipo(TipoStockMoviment.VENDA);
             movement.setQuantidade(retirada);
@@ -118,11 +116,11 @@ public class StockMovimentService {
 
 
     @Transactional
-    public Boolean consumoItens(Long productId, int quantidade, User user) {
+    public void consumoItens(Long productId, int quantidade, Long idUser, TipoStockMoviment tipoStockMoviment) {
 
-        Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(()-> new ResourceNotFoundException("Produto informado não existe. ID:" + productId));
-        List<Lote> lotes = loteRepository.findByProductIdOrderByDataValidadeAsc(productId); // alinha os produtos de um lote pela data de validade
+        Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(()-> new UserNotFoundException("Produto informado não existe. ID:" + productId));
         Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new StockNotFoundException("Stock não encontrado para o produto" + productId));
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
 
         if (stock.getQuantidadeAtual()<quantidade) {
             throw new InsufficientStock("Estoque insuficiente. Estoque atual: "+stock.getQuantidadeAtual());
@@ -134,44 +132,16 @@ public class StockMovimentService {
         StockMovement movement = new StockMovement();
         movement.setProduct(product);
         movement.setUser(user);
-        movement.setTipo(TipoStockMoviment.VENDA);
+        movement.setTipo(tipoStockMoviment);
         movement.setQuantidade(quantidade);
         movement.setDataHora(LocalDateTime.now());
 
         SMRepository.save(movement);
 
-        return true;
-
     }
 
     @Transactional
-    public void usoInterno(Long idLote, Long idUser, int quantidade) {
-
-        Lote l = loteRepository.findById(idLote)
-                .orElseThrow(() -> new ResourceNotFoundException("Lote Não Encontrado. ID: " + idLote));
-        User u = userRepository.findById(idUser)
-                .orElseThrow(() -> new UserNotFoundException("Usuario não foi encontrado. ID : " +idUser ));
-
-        if(l.getQuantAtual() < quantidade){
-            throw new IllegalArgumentException("A quantidade informada excede a quantidade de produtos no lote. Quantidade de prodiutos no lote: "+l.getQuantAtual());
-        }
-
-        l.setQuantAtual(l.getQuantAtual() - quantidade);
-        loteRepository.save(l);
-
-        StockMovement stockMovement = new StockMovement();
-        stockMovement.setLote(l);
-        stockMovement.setProduct(l.getProduct());
-        stockMovement.setUser(u);
-        stockMovement.setTipo(TipoStockMoviment.USO_INTERNO);
-        stockMovement.setQuantidade(quantidade);
-        stockMovement.setDataHora(LocalDateTime.now());
-
-
-    }
-
-    @Transactional
-    public void ajustarEstoque(Long productId, Long loteId, int quantidadeCorrigida, String observacao, User user) {
+    public void ajustarEstoque(Long productId, int quantidadeCorrigida, String observacao, Long idUser ) {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
@@ -179,26 +149,17 @@ public class StockMovimentService {
         Stock stock = stockRepository.findByProductId(productId)
                 .orElseThrow(() -> new StockNotFoundException("Estoque não encontrado"));
 
-        Lote lote = loteRepository.findById(loteId)
-                .orElseThrow(() -> new RuntimeException("Lote não encontrado"));
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
 
-        User user1 = userRepository.findById(user.getId()).orElseThrow(() -> new UserNotFoundException("usuario não encontrado"));
-
-        if (!lote.getProduct().getId().equals(productId)) {
-            throw new RuntimeException("Lote não pertence a este produto");
-        }
 
         int diferenca = quantidadeCorrigida - stock.getQuantidadeAtual();
-        int novaQuantidadeLote = lote.getQuantAtual() + diferenca;
+        int novaQuantidadeLote = stock.getQuantidadeAtual() + diferenca;
 
         if (novaQuantidadeLote < 0) {
             throw new RuntimeException(
-                    "Ajuste resultaria em quantidade negativa. Máximo permitido de retirada de produtos para esse lote: " + lote.getQuantAtual()
-            );
+                    "Ajuste resultaria em quantidade negativa. Máximo permitido de retirada de produtos para esse lote: " + stock.getQuantidadeAtual());
         }
 
-        lote.setQuantAtual(novaQuantidadeLote);
-        loteRepository.save(lote);
 
         stock.setQuantidadeAtual(quantidadeCorrigida);
         stockRepository.save(stock);
@@ -206,9 +167,8 @@ public class StockMovimentService {
         TipoStockMoviment tipo = diferenca > 0 ? TipoStockMoviment.AJUSTE_POSITIVO : TipoStockMoviment.AJUSTE_NEGATIVO;
 
         StockMovement stockMovement = new StockMovement();
-        stockMovement.setLote(lote);
         stockMovement.setProduct(product);
-        stockMovement.setUser(user1);
+        stockMovement.setUser(user);
         stockMovement.setTipo(tipo);
         stockMovement.setQuantidade(diferenca);
         stockMovement.setDataHora(LocalDateTime.now());
@@ -218,29 +178,37 @@ public class StockMovimentService {
 
     }
 
-    public void devolverProduto(Long idProduto, LocalDate validade, int quantidade){
+    public void devolverProduto(Long idProduto, int quantidade, Long idUser){
+
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
         Product product = productRepository.findByIdAndStatusTrue(idProduto).orElseThrow(()-> new ResourceNotFoundException("Priduto informado não existe. ID: "+ idProduto));
-
-        Lote lote = loteRepository.findByValidate(validade).orElseThrow(() -> new ResourceNotFoundException("Não há lote que corresponda à data de validade do produto."));
-        lote.setQuantAtual(lote.getQuantAtual()+quantidade);
-        loteRepository.save(lote);
-
         Stock stock = stockRepository.findByProductId(idProduto).orElseThrow(()-> new ResourceNotFoundException("Não exite um stock para esse produto !"));
+
         stock.setQuantidadeAtual(stock.getQuantidadeAtual()+quantidade);
         stockRepository.save(stock);
+
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setTipo(TipoStockMoviment.DEVOLUCAO);
+        stockMovement.setUser(user);
+        stockMovement.setQuantidade(quantidade);
+        stockMovement.setProduct(product);
+        stockMovement.setDataHora(LocalDateTime.now());
+        SMRepository.save(stockMovement);
+
+
     }
 
-    public StockMovementResponse updateStockMoviment(Long idStockMoviment, StockMoevementRequest request){
+    public StockMovementResponse updateStockMoviment(Long idStockMoviment, StockMoevementRequest request, Long idUser){
 
         StockMovement stockMoevement = SMRepository.findById(idStockMoviment).orElseThrow(()-> new ResourceNotFoundException("A movimentação informada não existe. ID: "+idStockMoviment));
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
 
-        stockMoevement.setLote(request.getLote());
         stockMoevement.setQuantidade(request.getQuantidade());
         stockMoevement.setProduct(request.getProduct());
-        stockMoevement.setDataHora(request.getDataHora());
+        stockMoevement.setDataHora(LocalDateTime.now());
         stockMoevement.setObservacao(request.getObservacao());
         stockMoevement.setTipo(request.getTipo());
-        stockMoevement.setUser(request.getUser());
+        stockMoevement.setUser(user);
 
         SMRepository.save(stockMoevement);
         return entityToDTO(stockMoevement);
@@ -269,7 +237,8 @@ public class StockMovimentService {
     }
 
     public StockMovementResponse buscarMovimentacaoPorID(Long idMovimentacao){
-        StockMovement stockMovement = stockRepository.findByProductId(idMovimentacao).orElseThrow(()-> new ResourceNotFoundException(""));
+        StockMovement stockMovement = SMRepository.findById(idMovimentacao).orElseThrow(()-> new ResourceNotFoundException("Movimentação com o ID: "+idMovimentacao+" não foi encontrado."));
+        return entityToDTO(stockMovement);
 
     }
 

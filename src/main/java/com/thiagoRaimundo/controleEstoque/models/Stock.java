@@ -26,7 +26,7 @@ public class Stock {
     private Boolean status;
     private LocalDateTime daleteAt;
     private String deleteBy;
-    private String deleteReason;
+
     @Version
     private Long version;
 
@@ -98,13 +98,6 @@ public class Stock {
         this.deleteBy = deleteBy;
     }
 
-    public String getDeleteReason() {
-        return deleteReason;
-    }
-
-    public void setDeleteReason(String deleteReason) {
-        this.deleteReason = deleteReason;
-    }
 
     @Override
     public boolean equals(Object o) {

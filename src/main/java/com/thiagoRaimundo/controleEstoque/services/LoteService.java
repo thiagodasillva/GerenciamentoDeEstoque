@@ -31,8 +31,6 @@ public class LoteService {
 
     }
 
-    // CRUD, validar datas
-
     public LoteResponse creatLote(LoteRequest loteRequest){
 
         if(loteRequest.getValidate().isBefore(LocalDate.now())){
@@ -55,18 +53,22 @@ public class LoteService {
     }
 
 
-    public LoteResponse getLote(Long idLote){
+    public LoteResponse getLoteById(Long idLote){
         Lote lote = loteRepository.findByIdAndStatusTrue(idLote).orElseThrow(() -> new LoteNotFoundException("Não Foi encontrado nenhum lote com o ID: "+ idLote));
         return entityToDTO(lote);
     }
 
+    public LoteResponse getLoteById(String codigoLote){
+        Lote lote = loteRepository.findByCodigo(codigoLote).orElseThrow(() -> new LoteNotFoundException("Não Foi encontrado nenhum lote com o Codigo: "+ codigoLote));
+        return entityToDTO(lote);
+    }
 
-    public List<LoteResponse> buscarLotesDeProdutosOrdenadosPorDataDeValidade(Long id){
-        if(!productRepository.existsById(id)){
-            throw new ResourceNotFoundException("O produto não encontrado. ID: "+ id );
+
+    public List<LoteResponse> getLotesByProdutosOrderByValidadeDate(Long idProduct){
+        if(!productRepository.existsById(idProduct)){
+            throw new ResourceNotFoundException("O produto não encontrado. ID: "+ idProduct );
         }
-
-        return loteRepository.findByProductIdAndStatusTrueOrderByDataValidadeAsc(id).stream().map(this::entityToDTO).toList();
+        return loteRepository.findByProductIdAndStatusTrueOrderByDataValidadeAsc(idProduct).stream().map(this::entityToDTO).toList();
 
     }
 
@@ -83,9 +85,10 @@ public class LoteService {
             throw new ResourceNotFoundException("O produto informado no lote não existe. Id Produto: "+ loteRequest.getProduct().getId());
         }
 
-        lote.setQuantAtual(loteRequest.getQuantAtual());
+        lote.setQuantProdutos(loteRequest.getQuantProdutos());
         lote.setProduct(loteRequest.getProduct());
         lote.setValidate(loteRequest.getValidate());
+        lote.setCodigo(loteRequest.getCodigo());
         loteRepository.save(lote);
 
         return entityToDTO(lote);

@@ -21,8 +21,6 @@ public class StockMovement {
     @ManyToOne
     private User user;
     @ManyToOne
-    private Lote lote;
-    @ManyToOne
     private Product product;
 
     public StockMovement() {
@@ -72,14 +70,6 @@ public class StockMovement {
         this.user = user;
     }
 
-    public Lote getLote() {
-        return lote;
-    }
-
-    public void setLote(Lote lote) {
-        this.lote = lote;
-    }
-
     public Product getProduct() {
         return product;
     }
@@ -96,7 +86,6 @@ public class StockMovement {
                 ", observacao='" + observacao + '\'' +
                 ", dataHora=" + dataHora +
                 ", user=" + user +
-                ", lote=" + lote +
                 ", product=" + product +
                 '}';
     }
