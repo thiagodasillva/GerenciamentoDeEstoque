@@ -11,7 +11,6 @@ import com.thiagoRaimundo.controleEstoque.repository.SaleItemRepository;
 import com.thiagoRaimundo.controleEstoque.repository.SaleRepository;
 import com.thiagoRaimundo.controleEstoque.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.hibernate.grammars.hql.HqlParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

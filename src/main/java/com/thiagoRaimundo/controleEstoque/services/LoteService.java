@@ -58,7 +58,7 @@ public class LoteService {
         return entityToDTO(lote);
     }
 
-    public LoteResponse getLoteById(String codigoLote){
+    public LoteResponse getLoteByCodigo(String codigoLote){
         Lote lote = loteRepository.findByCodigo(codigoLote).orElseThrow(() -> new LoteNotFoundException("Não Foi encontrado nenhum lote com o Codigo: "+ codigoLote));
         return entityToDTO(lote);
     }

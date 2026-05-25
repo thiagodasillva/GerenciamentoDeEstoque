@@ -38,7 +38,7 @@ public class ProductService {
         return productRepository.findByStatusTrue().stream().map(this::entityToDto).toList();
     }
 
-    public ProductResponse CreatProduct(ProductRequest productRequest){
+    public ProductResponse creatProduct(ProductRequest productRequest){
         Product product = productRepository.save(DTOToEntity(productRequest));
         return entityToDto(product);
     }
