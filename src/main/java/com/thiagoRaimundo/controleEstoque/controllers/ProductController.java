@@ -6,13 +6,13 @@ import com.thiagoRaimundo.controleEstoque.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/product")
-@Valid
+@RequestMapping("api/products")
 public class ProductController {
 
     private ProductService productService;
@@ -23,18 +23,18 @@ public class ProductController {
 
 
     @PostMapping
-    public ResponseEntity<ProductResponse> criarProduto(@RequestBody ProductRequest productRequest){
+    public ResponseEntity<ProductResponse> criarProduto(@Valid @RequestBody ProductRequest productRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.creatProduct(productRequest));
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> buscaProdutoPorId(@PathVariable Long id){
+    public ResponseEntity<ProductResponse> buscaProdutoPorId(@Validated @PathVariable Long id){
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
     @GetMapping("name/{name}")
-    public ResponseEntity<ProductResponse> buscaProdutoPorNome(@PathVariable String name){
+    public ResponseEntity<ProductResponse> buscaProdutoPorNome(@Validated @PathVariable String name){
         return ResponseEntity.ok(productService.getByName(name));
     }
 
@@ -45,12 +45,12 @@ public class ProductController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> atualizarProduto(@PathVariable Long id, @RequestBody ProductRequest productRequest){
+    public ResponseEntity<ProductResponse> atualizarProduto(@Validated @PathVariable Long id,@Valid @RequestBody ProductRequest productRequest){
         return ResponseEntity.ok(productService.updateProduct(id,productRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
+    public ResponseEntity<Void> deletarProduto(@Validated @PathVariable Long id) {
         productService.DeleteProduct(id);
         return ResponseEntity.noContent().build();
     }

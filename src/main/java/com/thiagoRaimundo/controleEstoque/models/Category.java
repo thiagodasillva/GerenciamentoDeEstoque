@@ -13,7 +13,7 @@ public class Category {
     private Long id;
     private String name;
     private String description;
-    @ManyToOne()
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private Collection<Product> product;
 
     public Long getId() {

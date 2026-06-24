@@ -18,7 +18,7 @@ public class User {
     private String password;
     private TipoUser tipoUser;
     private Boolean status = true;
-    @ManyToOne
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Collection<StockMovement> stockMovement;
 
 

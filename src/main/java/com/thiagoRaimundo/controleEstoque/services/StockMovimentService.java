@@ -14,6 +14,7 @@ import com.thiagoRaimundo.controleEstoque.repository.*;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -32,18 +33,16 @@ public class StockMovimentService {
     private LoteRepository loteRepository;
     private UserRepository userRepository;
     private ProductRepository productRepository;
-
     private ModelMapper modelMapper;
 
-    public StockMovimentService(StockMovimentRepository SMRepository, StockRepository stockRepository, LoteRepository loteRepository, UserRepository userRepository, ProductRepository productRepository) {
+    public StockMovimentService(StockMovimentRepository SMRepository, StockRepository stockRepository, LoteRepository loteRepository, UserRepository userRepository, ProductRepository productRepository, ModelMapper modelMapper) {
         this.SMRepository = SMRepository;
+        this.stockRepository = stockRepository;
         this.loteRepository = loteRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
-        this.stockRepository = stockRepository;
-
+        this.modelMapper = modelMapper;
     }
-
 
     @Transactional
     public StockMovementResponse entradaItens(Lote lote, Long idUser,int quantidade) {
@@ -75,7 +74,7 @@ public class StockMovimentService {
     public void consumoItensFEFO(Long productId, int quantidade, User user) {
 
         Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(()-> new ResourceNotFoundException("Produto informado não existe. ID:" + productId));
-        List<Lote> lotes = loteRepository.findByProductIdOrderByDataValidadeAsc(productId); // alinha os produtos de um lote pela data de validade
+        List<Lote> lotes = loteRepository.findByProductIdOrderByValidateAsc(productId); // alinha os produtos de um lote pela data de validade
         Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new StockNotFoundException("Stock não encontrado para o produto" + productId));
 
         if (stock.getQuantidadeAtual()<quantidade) {
@@ -231,7 +230,7 @@ public class StockMovimentService {
 
 
     public List<StockMovementResponse> listarMovimentosPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
-        return SMRepository.findByDataHoraBetween(inicio, fim)
+        return SMRepository.findByDataHoraBetween(inicio, fim, PageRequest.of(0,10))
                 .stream()
                 .map(this::entityToDTO).collect(Collectors.toList());
     }

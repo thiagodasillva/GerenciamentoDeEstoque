@@ -10,23 +10,21 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tb_Storck")
+@Table(name = "tb_stock")
 public class Stock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @OneToOne
-    @JoinColumn(name = "id",unique = true)
+    @JoinColumn(name = "product_id",unique = true)
     private Product product;
     private Integer quantidadeAtual;
     private Integer quantidadeMinima;
     private Integer quantidadeMaxima;
     private Boolean status;
-    private LocalDateTime daleteAt;
-    private String deleteBy;
-
+    private LocalDateTime daletedAt;
+    //private String deleteBy;
     @Version
     private Long version;
 
@@ -83,20 +81,20 @@ public class Stock {
     }
 
     public LocalDateTime getDaleteAt() {
-        return daleteAt;
+        return daletedAt;
     }
 
-    public void setDaleteAt(LocalDateTime daleteAt) {
-        this.daleteAt = daleteAt;
+    public void setDaletedAt(LocalDateTime daleteAt) {
+        this.daletedAt = daleteAt;
     }
 
-    public String getDeleteBy() {
-        return deleteBy;
-    }
+    //public String getDeleteBy() {
+    //    return deleteBy;
+   // }
 
-    public void setDeleteBy(String deleteBy) {
-        this.deleteBy = deleteBy;
-    }
+    //public void setDeleteBy(String deleteBy) {
+    //    this.deleteBy = deleteBy;
+    //}
 
 
     @Override

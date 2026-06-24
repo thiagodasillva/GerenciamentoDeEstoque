@@ -1,6 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.exceptions;
 
-public class ValidationError {
+public class ValidationError extends RuntimeException{
 
     private String field;
     private String message;

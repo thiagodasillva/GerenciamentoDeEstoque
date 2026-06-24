@@ -8,12 +8,10 @@ import com.thiagoRaimundo.controleEstoque.exceptions.LoteNotFoundException;
 import com.thiagoRaimundo.controleEstoque.repository.LoteRepository;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,13 +20,13 @@ public class LoteService {
     private LoteRepository loteRepository;
     private ProductRepository productRepository;
     private ModelMapper modelMapper;
-    private static final Logger log = (Logger) LoggerFactory.getLogger(LoteService.class);
+    //private static final Logger log = (Logger) LoggerFactory.getLogger(LoteService.class);
 
 
-    public LoteService(LoteRepository loteRepository, ProductRepository productRepository) {
+    public LoteService(LoteRepository loteRepository, ProductRepository productRepository, ModelMapper modelMapper) {
         this.loteRepository = loteRepository;
         this.productRepository = productRepository;
-
+        this.modelMapper = modelMapper;
     }
 
     public LoteResponse creatLote(LoteRequest loteRequest){
@@ -68,7 +66,7 @@ public class LoteService {
         if(!productRepository.existsById(idProduct)){
             throw new ResourceNotFoundException("O produto não encontrado. ID: "+ idProduct );
         }
-        return loteRepository.findByProductIdAndStatusTrueOrderByDataValidadeAsc(idProduct).stream().map(this::entityToDTO).toList();
+        return loteRepository.findByProductIdAndStatusTrueOrderByValidateAsc(idProduct).stream().map(this::entityToDTO).toList();
 
     }
 

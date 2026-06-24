@@ -13,6 +13,8 @@ target/
 .springBeans
 .sts4-cache
 
+
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -31,3 +33,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+###  ###
+scr/main/resources/application-example.properties
+scr/main/resources/application-local.properties

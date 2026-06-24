@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tb_stockMoviment")
+@Table(name = "tb_stock_movement")
 public class StockMovement {
 
     @Id
@@ -19,8 +19,10 @@ public class StockMovement {
     private String observacao;
     private LocalDateTime dataHora;
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     public StockMovement() {

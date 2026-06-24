@@ -30,13 +30,16 @@ public class SaleService {
     private SaleItemRepository saleItemRepository;
     private ModelMapper modelMapper;
 
-    public SaleService(SaleRepository saleRepository, UserRepository userRepository, ProductRepository productRepository, StockMovimentService stockMovimentService, SaleItemRepository saleItemRepository) {
+    public SaleService(SaleRepository saleRepository, UserRepository userRepository, ProductRepository productRepository, StockMovimentService stockMovimentService, SaleItemRepository saleItemRepository, ModelMapper modelMapper) {
         this.saleRepository = saleRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.stockMovimentService = stockMovimentService;
         this.saleItemRepository = saleItemRepository;
+        this.modelMapper = modelMapper;
     }
+
+
 
     public SaleResponse getSaleById(Long idSale){
         Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("Venda não Encontrada. ID: "+idSale));

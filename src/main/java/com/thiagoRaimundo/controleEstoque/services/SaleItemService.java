@@ -18,13 +18,13 @@ public class SaleItemService{
     private ProductRepository productRepository;
     private ModelMapper modelMapper;
 
-
-
-
-    public SaleItemService(SaleItemRepository itemRepository, ProductRepository productRepository) {
+    public SaleItemService(SaleItemRepository itemRepository, ProductRepository productRepository, ModelMapper modelMapper) {
         this.itemRepository = itemRepository;
         this.productRepository = productRepository;
+        this.modelMapper = modelMapper;
     }
+
+
 
     public SaleItemResponse creatItem(SaleItemRequest itemRequest){
 

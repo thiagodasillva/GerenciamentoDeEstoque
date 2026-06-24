@@ -3,7 +3,6 @@ package com.thiagoRaimundo.controleEstoque.models;
 import jakarta.persistence.*;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -16,13 +15,17 @@ public class Product {
     @Column(name = "name")
     private String name;
     @Column(name = "predictDescription")
-    private String Description;
+    private String description;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @OneToMany(mappedBy = "product")
     private Collection<Lote> lotes;
+
+    @OneToOne(mappedBy = "product")
+    private Stock stock;
 
     private Boolean status = true;
 
@@ -34,7 +37,6 @@ public class Product {
         return id;
     }
 
-
     public String getName() {
         return name;
     }
@@ -44,11 +46,11 @@ public class Product {
     }
 
     public String getDescription() {
-        return Description;
+        return description;
     }
 
     public void setDescription(String description) {
-        Description = description;
+        description = description;
     }
 
     public Category getCategory() {
@@ -73,6 +75,14 @@ public class Product {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public Stock getStock() {
+        return stock;
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 
     @Override

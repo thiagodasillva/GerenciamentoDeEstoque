@@ -16,11 +16,14 @@ public class UserService {
     private UserRepository userRepository;
     private ModelMapper modelMapper;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;}
+    public UserService(UserRepository userRepository, ModelMapper modelMapper) {
+        this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
+    }
+
 
     public UserResponse getUser(Long idUser){
-        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario informado não existe. ID: "));
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario informado não existe. ID: "+ idUser));
         return entityToDto(user);
 
     }
@@ -36,7 +39,7 @@ public class UserService {
     }
 
     public void deleteLogico(Long idUser){
-        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario infomado não existe"));
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario infomado não existe :"+ idUser));
         user.setStatus(false);
         userRepository.save(user);
     }
@@ -44,7 +47,7 @@ public class UserService {
 
     public UserResponse updateUser(Long idUser, UserRequest userRequest){
 
-        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario infomado não existe"));
+        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(()-> new ResourceNotFoundException("O usuario infomado não existe: "+ idUser));
 
         user.setName(userRequest.getName());
         user.setEmail(userRequest.getEmail());

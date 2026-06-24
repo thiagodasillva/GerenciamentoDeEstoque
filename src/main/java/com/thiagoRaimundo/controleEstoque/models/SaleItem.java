@@ -14,9 +14,11 @@ public class SaleItem {
     private BigDecimal valorVenda;
     private BigDecimal subTotal;
     private Integer quantidade;
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
     @ManyToOne
+    @JoinColumn(name = "sale_id")
     private Sale sale;
 
 

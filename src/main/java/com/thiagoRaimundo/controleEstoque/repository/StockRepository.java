@@ -15,6 +15,6 @@ public interface StockRepository extends JpaRepository<Stock,Long> {
 
     Optional<Stock> findByIdAndStatusTrue(Long id);
 
-    @Query(value = "SELECT SUM(s.quantidade), p.nome FROM sales s JOIN stock p ON p.id = s.product_id WHERE p.status = false OR p.status = true GROUP BY p.nome;")
-    List<Object[]> relatorioDeEstoquesHistorico();
+    //@Query(value = "SELECT SUM(s.quantidade), p.nome FROM tb_sale s JOIN tb_stock p ON p.id = s.product_id WHERE p.status = false OR p.status = true GROUP BY p.nome;",nativeQuery = true)
+    //List<Object[]> relatorioDeEstoquesHistorico();
 }
