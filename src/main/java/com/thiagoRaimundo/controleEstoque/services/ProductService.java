@@ -4,6 +4,7 @@ import com.thiagoRaimundo.controleEstoque.DTOs.ProductRequest;
 import com.thiagoRaimundo.controleEstoque.DTOs.ProductResponse;
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 
+import com.thiagoRaimundo.controleEstoque.models.Category;
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import com.thiagoRaimundo.controleEstoque.repository.CategoryRepository;
 import com.thiagoRaimundo.controleEstoque.repository.ProductRepository;
@@ -26,12 +27,12 @@ public class ProductService {
     }
 
     public ProductResponse getProduct(Long idProduct){
-       Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo"));
-       return entityToDto(product);
+        Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo. ID: "+ idProduct));
+        return entityToDto(product);
     }
 
     public ProductResponse getByName(String name){
-        Product product = productRepository.findByNameAndStatusTrue(name).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo"));
+        Product product = productRepository.findByNameAndStatusTrue(name).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo, Nome: "+ name));
         return entityToDto(product);
     }
 
@@ -39,33 +40,45 @@ public class ProductService {
         return productRepository.findByStatusTrue().stream().map(this::entityToDto).toList();
     }
 
+    @Transactional
     public ProductResponse creatProduct(ProductRequest productRequest){
-        Product product = productRepository.save(DTOToEntity(productRequest));
+        Category category = categoryRepository.findById(productRequest.getCategoryId()).orElseThrow(()-> new ResourceNotFoundException("Categoria não encontrada. ID: "+ productRequest.getCategoryId()));
+
+        Product product = new Product();
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setCategory(category);
+        product.setStatus(true);
+
+        Product savefProduct = productRepository.save(product);
+
         return entityToDto(product);
     }
 
 
     @Transactional
     public void DeleteProduct (Long idProduct){
-        Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(() -> new ResourceNotFoundException("O Produto informado não existe"));
+        Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(() -> new ResourceNotFoundException("O Produto informado não existe. ID: "+ idProduct));
         product.setStatus(false);
         productRepository.save(product);
 
     }
 
+    @Transactional
     public ProductResponse updateProduct(Long idProduct, ProductRequest productRequest){
+
         Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(() -> new ResourceNotFoundException("O produto informado não existe. ID: "+idProduct));
 
-        product.setName(productRequest.getName());
-        product.setDescription(productRequest.getDescription());
-        product.setCategory(productRequest.getCategory());
-        if(productRequest.getLotes() != null){
-            product.setLotes(productRequest.getLotes());
+        if(productRequest.getName() != null){product.setName(productRequest.getName());}
+        if(productRequest.getDescription() != null){product.setDescription(productRequest.getDescription());}
+        if(productRequest.getCategoryId() != null){
+            Category category = categoryRepository.findById(productRequest.getCategoryId())
+                    .orElseThrow(()->new ResourceNotFoundException("Categoria não encontrada. ID: "+productRequest.getCategoryId()));
+            product.setCategory(category);
         }
 
-        productRepository.save(product);
-
-        return entityToDto(product);
+        Product updatedProduct = productRepository.save(product);
+        return entityToDto(updatedProduct);
 
     }
 

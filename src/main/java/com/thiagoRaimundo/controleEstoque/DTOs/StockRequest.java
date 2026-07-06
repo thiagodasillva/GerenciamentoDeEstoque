@@ -3,58 +3,29 @@ package com.thiagoRaimundo.controleEstoque.DTOs;
 import com.thiagoRaimundo.controleEstoque.models.Product;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class StockRequest {
 
     @NotNull(message = "O produto do estoque a ser criado deve ser informado")
-    private Product product;
+    private Long productId;
     @NotNull(message = "a quantidade atual ao criar o produto deve ser informado")
-    @Min(value = 0)
+    @Min(value = 0, message = "A quantidade atual não pode ser negativa")
     private Integer quantidadeAtual;
     @NotNull(message = "A quantidade que o produto pode ter deve ser informada")
-    @Min(value = 1)
+    @Min(value = 0, message = "A quantidade mínima não pode ser negativa")
     private Integer quantidadeMinima;
+    @NotNull(message = "A quantidade máxima deve ser informada")
+    @Min(value = 1, message = "A quantidade máxima deve ser pelo menos 1")
     private Integer quantidadeMaxima;
 
-    public StockRequest(Product product, Integer quantidadeAtual, Integer quantidadeMinima, Integer quantidadeMaxima) {
-        this.product = product;
-        this.quantidadeAtual = quantidadeAtual;
-        this.quantidadeMinima = quantidadeMinima;
-        this.quantidadeMaxima = quantidadeMaxima;
-    }
 
-    public StockRequest() {
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public Integer getQuantidadeAtual() {
-        return quantidadeAtual;
-    }
-
-    public void setQuantidadeAtual(Integer quantidadeAtual) {
-        this.quantidadeAtual = quantidadeAtual;
-    }
-
-    public Integer getQuantidadeMinima() {
-        return quantidadeMinima;
-    }
-
-    public void setQuantidadeMinima(Integer quantidadeMinima) {
-        this.quantidadeMinima = quantidadeMinima;
-    }
-
-    public Integer getQuantidadeMaxima() {
-        return quantidadeMaxima;
-    }
-
-    public void setQuantidadeMaxima(Integer quantidadeMaxima) {
-        this.quantidadeMaxima = quantidadeMaxima;
-    }
 }

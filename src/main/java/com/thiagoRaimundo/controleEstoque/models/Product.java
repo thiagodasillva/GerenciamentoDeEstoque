@@ -14,9 +14,8 @@ public class Product {
     private Long id;
     @Column(name = "name")
     private String name;
-    @Column(name = "predictDescription")
+    @Column(name = "product_description")
     private String description;
-
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

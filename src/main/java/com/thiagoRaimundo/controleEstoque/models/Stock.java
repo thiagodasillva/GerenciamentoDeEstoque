@@ -3,10 +3,7 @@ package com.thiagoRaimundo.controleEstoque.models;
 import jakarta.persistence.*;
 import org.springframework.context.annotation.EnableMBeanExport;
 
-import java.text.DateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -19,21 +16,29 @@ public class Stock {
     @OneToOne
     @JoinColumn(name = "product_id",unique = true)
     private Product product;
+
+    @Column(name = "quantidade_atual")
     private Integer quantidadeAtual;
+    @Column(name = "quantidade_minima")
     private Integer quantidadeMinima;
+    @Column(name = " quantidade_maxima")
     private Integer quantidadeMaxima;
     private Boolean status;
-    private LocalDateTime daletedAt;
+    @Column(name = "deleted_at" )
+    private LocalDateTime deletedAt;
     //private String deleteBy;
     @Version
     private Long version;
-
 
     public Stock() {
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Product getProduct() {
@@ -68,10 +73,6 @@ public class Stock {
         this.quantidadeMaxima = quantidadeMaxima;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Boolean getStatus() {
         return status;
     }
@@ -80,22 +81,21 @@ public class Stock {
         this.status = status;
     }
 
-    public LocalDateTime getDaleteAt() {
-        return daletedAt;
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
     }
 
-    public void setDaletedAt(LocalDateTime daleteAt) {
-        this.daletedAt = daleteAt;
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
-    //public String getDeleteBy() {
-    //    return deleteBy;
-   // }
+    public Long getVersion() {
+        return version;
+    }
 
-    //public void setDeleteBy(String deleteBy) {
-    //    this.deleteBy = deleteBy;
-    //}
-
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
     @Override
     public boolean equals(Object o) {

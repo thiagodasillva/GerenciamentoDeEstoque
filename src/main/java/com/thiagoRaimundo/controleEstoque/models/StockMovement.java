@@ -14,22 +14,38 @@ public class StockMovement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated(EnumType.STRING)
+    @Column(name = "tipo")
     private TipoStockMoviment tipo;
+
+    @Column(name ="quantidade")
     private Integer quantidade; // quantidade de produtos na operação
+
+    @Column(name = "observacao")
     private String observacao;
+
+    @Column(name = "data_hora")
     private LocalDateTime dataHora;
+    private Boolean status = true;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+    @ManyToOne
+    @JoinColumn(name = "lote_id")
+    private Lote lote;
 
     public StockMovement() {
     }
 
+
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public TipoStockMoviment getTipo() {
@@ -64,6 +80,14 @@ public class StockMovement {
         this.dataHora = dataHora;
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
     public User getUser() {
         return user;
     }
@@ -78,6 +102,14 @@ public class StockMovement {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public Lote getLote() {
+        return lote;
+    }
+
+    public void setLote(Lote lote) {
+        this.lote = lote;
     }
 
     @Override

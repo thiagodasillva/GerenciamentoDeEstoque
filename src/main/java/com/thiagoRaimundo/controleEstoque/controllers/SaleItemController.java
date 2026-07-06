@@ -53,6 +53,11 @@ public class SaleItemController {
 
     }
 
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<List<SaleItemResponse>> getItensByProduct(@Valid @PathVariable Long productId) {
+        return ResponseEntity.ok(saleItemService.getItensByProductId(productId));
+    }
+
 
 
 

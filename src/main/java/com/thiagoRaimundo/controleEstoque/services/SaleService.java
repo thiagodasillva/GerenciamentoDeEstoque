@@ -2,6 +2,7 @@ package com.thiagoRaimundo.controleEstoque.services;
 
 import com.thiagoRaimundo.controleEstoque.DTOs.SaleItemRequest;
 import com.thiagoRaimundo.controleEstoque.DTOs.SaleResponse;
+import com.thiagoRaimundo.controleEstoque.DTOs.StockMoevementRequest;
 import com.thiagoRaimundo.controleEstoque.exceptions.ResourceNotFoundException;
 import com.thiagoRaimundo.controleEstoque.models.*;
 import com.thiagoRaimundo.controleEstoque.DTOs.SaleRequest;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class SaleService {
+
 
     private SaleRepository saleRepository;
     private UserRepository userRepository;
@@ -61,11 +63,12 @@ public class SaleService {
     }
 
 
-    public void deleteLogico(Long idSale, Long idUser){
+    public void deleteLogico(Long idSale){
 
-        User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
 
         Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("Venda não Encontrada. ID: "+idSale));
+        User user = userRepository.findByIdAndStatusTrue(sale.getUser().getId()).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + sale.getUser().getId()));
+
         sale.setStatus(false);
         sale.setDeleteBy(user.getEmail());
         sale.setDaleteAt(LocalDateTime.now());
@@ -89,10 +92,10 @@ public class SaleService {
 
         for (SaleItemRequest itemDTO : dto.getItens()) {
 
-            Product product = productRepository.findById(itemDTO.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado. ID: "+ itemDTO.getProduct().getId()));
+            Product product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado. ID: "+ itemDTO.getProductId()));
 
-            stockMovimentService.consumoItensFEFO(product.getId(), itemDTO.getQuantidade(), user);
+            stockMovimentService.consumoItensFEFO(product.getId(), itemDTO.getQuantidade(), idUser);
 
             SaleItem item = new SaleItem();
             item.setSale(sale);
@@ -116,9 +119,9 @@ public class SaleService {
     }
 
     @Transactional
-    public SaleResponse realizarVenda(Long idUser, SaleRequest dto) {
+    public SaleResponse realizarVenda(SaleRequest dto) {
 
-        User user = userRepository.findById(idUser)
+        User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         Sale sale = new Sale();
@@ -129,10 +132,11 @@ public class SaleService {
 
         for (SaleItemRequest itemDTO : dto.getItens()) {
 
-            Product product = productRepository.findById(itemDTO.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado. ID: "+ itemDTO.getProduct().getId()));
+            Product product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado. ID: "+ itemDTO.getProductId()));
 
-            stockMovimentService.consumoItens(product.getId(), itemDTO.getQuantidade(),idUser, TipoStockMoviment.VENDA );
+
+            stockMovimentService.consumoItens(product.getId(), itemDTO.getQuantidade(),user.getId(), TipoStockMoviment.VENDA);
 
             SaleItem item = new SaleItem();
             item.setSale(sale);
@@ -157,22 +161,21 @@ public class SaleService {
 
 
     @Transactional
-    public SaleResponse updateSale(Long idSale, SaleRequest saleRequest,Long idUser){
+    public SaleResponse updateSale(Long idSale, SaleRequest saleRequest){
 
         Sale sale = saleRepository.findByIdAndStatusTrue(idSale).orElseThrow(()-> new ResourceNotFoundException("A compra informada não existe. ID: "+ idSale));
 
-        if(!userRepository.existsById(idUser)){
-            throw new ResourceNotFoundException("o usuario Informado não existe. ID: "+ saleRequest.getUser().getId());
-        }
+        User user = userRepository.findById(saleRequest.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         sale.setDataVenda(saleRequest.getDataVenda());
-        sale.setUser(saleRequest.getUser());
+        sale.setUser(user);
         sale.setValorTotal(saleRequest.getValorTotal());
         sale.getItens().clear();
 
         saleRepository.save(sale);
 
-        processaNovosItens(sale,saleRequest,idUser);
+        processaNovosItens(sale,saleRequest,user.getId());
 
         return entityToDTO(sale);
 
@@ -185,7 +188,7 @@ public class SaleService {
                 .collect(Collectors.toMap( i -> i.getProduct().getId(), i -> i));
 
         Map<Long, Integer> novosItens = saleRequest.getItens().stream()
-                .collect(Collectors.toMap(i -> i.getProduct().getId(), i -> i.getQuantidade()));
+                .collect(Collectors.toMap(i -> i.getProductId(), i -> i.getQuantidade()));
 
 
         itensAtuais.forEach((productId, saleItem) -> {
@@ -198,7 +201,7 @@ public class SaleService {
         List<SaleItem> itensParaSalvar = new ArrayList<>();
 
         for (SaleItemRequest itemRequest : saleRequest.getItens()) {
-            Long productId = itemRequest.getProduct().getId();
+            Long productId = itemRequest.getProductId();
 
             Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(() -> new ResourceNotFoundException("Produto não existe. ID: " + productId));
 
@@ -250,4 +253,9 @@ public class SaleService {
     private SaleResponse entityToDTO(Sale sale){
         return modelMapper.map(sale, SaleResponse.class);
     }
+
+
+
+
+
 }

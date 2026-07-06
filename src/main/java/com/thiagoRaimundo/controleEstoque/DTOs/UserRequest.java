@@ -4,10 +4,19 @@ import com.thiagoRaimundo.controleEstoque.models.Enum.TipoUser;
 import com.thiagoRaimundo.controleEstoque.models.StockMovement;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Collection;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserRequest {
 
     @NotNull(message = "O nome do usuario deve ser informado")
@@ -20,63 +29,15 @@ public class UserRequest {
     private String email;
 
     @NotNull(message = "a senha deve ser informada")
-    @Size(max = 10,min = 6, message = "a senha deve ter valor maximo de 10 caracteres e minimo de 6")
+    @Size(max = 20,min = 8, message = "a senha deve ter entre 8 e 20 caracteris")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$",
+            message = "A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial")
     private String password;
 
+    @NotNull(message = "O tipo de usuário deve ser informado")
+    private TipoUser tipoUser;
     private Collection<StockMovement> stockMovement;
 
 
-    @NotNull
-    private TipoUser tipoUser;
 
-    public UserRequest() {
-    }
-
-    public UserRequest(String name, String email, String password, Collection<StockMovement> stockMovement, TipoUser tipoUser) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.stockMovement = stockMovement;
-        this.tipoUser = tipoUser;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public TipoUser getTipoUser() {
-        return tipoUser;
-    }
-
-    public void setTipoUser(TipoUser tipoUser) {
-        this.tipoUser = tipoUser;
-    }
-
-    public Collection<StockMovement> getStockMovement() {
-        return stockMovement;
-    }
-
-    public void setStockMovement(Collection<StockMovement> stockMovement) {
-        this.stockMovement = stockMovement;
-    }
 }

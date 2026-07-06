@@ -14,6 +14,7 @@ public class LoteResponse {
 
     private Long id;
     private Product product;
+    private String productName;
     private Integer quantProdutos;
     private String codigo;
     private LocalDate validate;

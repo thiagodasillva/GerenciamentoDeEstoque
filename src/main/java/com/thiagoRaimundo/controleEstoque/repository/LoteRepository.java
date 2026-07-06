@@ -24,7 +24,9 @@ public interface LoteRepository extends JpaRepository<Lote,Long> {
     //retorna lote por ID com com status true
     Optional<Lote> findByIdAndStatusTrue(Long productId);
 
-    Optional<Lote> findByCodigo(String codigo);
+    Optional<Lote> findByCodigoAndStatusTrue(String codigo);
+
+    Boolean existsByCodigo(String codigo);
 
     Optional<Lote> findByValidate(LocalDate validate);
 

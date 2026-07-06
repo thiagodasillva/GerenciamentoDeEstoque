@@ -4,9 +4,16 @@ import com.thiagoRaimundo.controleEstoque.models.Category;
 import com.thiagoRaimundo.controleEstoque.models.Lote;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Collection;
-
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductRequest {
 
     @NotNull
@@ -15,51 +22,9 @@ public class ProductRequest {
 
     @NotNull
     @Size(max = 500)
-    private String Description;
+    private String description;
     @NotNull
-    private Category category;
+    private Long categoryId;
 
-    private Collection<Lote> lotes;
-
-    public ProductRequest() {
-    }
-
-    public ProductRequest(String name, String description, Category category, Collection<Lote> lotes) {
-        this.name = name;
-        Description = description;
-        this.category = category;
-        this.lotes = lotes;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return Description;
-    }
-
-    public void setDescription(String description) {
-        Description = description;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Collection<Lote> getLotes() {
-        return lotes;
-    }
-
-    public void setLotes(Collection<Lote> lotes) {
-        this.lotes = lotes;
-    }
+    private Collection<Long> lotes;
 }

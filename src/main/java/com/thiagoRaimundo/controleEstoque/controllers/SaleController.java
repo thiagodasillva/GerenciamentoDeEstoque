@@ -43,6 +43,22 @@ public class SaleController {
         return ResponseEntity.ok(saleService.getValueMargin(min,max));
     }
 
+    @PostMapping
+    public ResponseEntity<SaleResponse> criarVenda(@RequestBody SaleRequest request) {
+        return ResponseEntity.ok(saleService.realizarVenda(request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SaleResponse> atualizarVenda(@PathVariable Long id, @RequestBody SaleRequest request) {
+        return ResponseEntity.ok(saleService.updateSale(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarVenda(@PathVariable Long id) {
+        saleService.deleteLogico(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 

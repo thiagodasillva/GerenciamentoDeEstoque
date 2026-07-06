@@ -5,9 +5,17 @@ import com.thiagoRaimundo.controleEstoque.models.Sale;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class SaleItemRequest {
 
     @NotNull
@@ -24,59 +32,9 @@ public class SaleItemRequest {
 
 
     @NotNull
-    private Product product;
+    private Long productId;
 
     @NotNull
-    private Sale sale;
+    private Long saleId;
 
-    public SaleItemRequest() {
-    }
-
-    public SaleItemRequest(BigDecimal valorVenda, BigDecimal subTotal, Integer quantidade, Product product, Sale sale) {
-        this.valorVenda = valorVenda;
-        this.subTotal = subTotal;
-        this.quantidade = quantidade;
-        this.product = product;
-        this.sale = sale;
-    }
-
-    public BigDecimal getValorVenda() {
-        return valorVenda;
-    }
-
-    public void setValorVenda(BigDecimal valorVenda) {
-        this.valorVenda = valorVenda;
-    }
-
-    public BigDecimal getSubTotal() {
-        return subTotal;
-    }
-
-    public void setSubTotal(BigDecimal subTotal) {
-        this.subTotal = subTotal;
-    }
-
-    public Integer getQuantidade() {
-        return quantidade;
-    }
-
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public Sale getSale() {
-        return sale;
-    }
-
-    public void setSale(Sale sale) {
-        this.sale = sale;
-    }
 }

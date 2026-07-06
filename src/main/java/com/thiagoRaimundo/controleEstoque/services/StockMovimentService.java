@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Service
 public class StockMovimentService {
 
+
     private StockMovimentRepository SMRepository;
     private StockRepository stockRepository;
     private LoteRepository loteRepository;
@@ -44,38 +45,110 @@ public class StockMovimentService {
         this.modelMapper = modelMapper;
     }
 
-    @Transactional
-    public StockMovementResponse entradaItens(Lote lote, Long idUser,int quantidade) {
 
-        User u = userRepository.findById(idUser).orElseThrow(() -> new UserNotFoundException("Usuario não foi encontrado. ID: " + idUser));
-        Product product = productRepository.findByIdAndStatusTrue(lote.getProduct().getId()).orElseThrow(() -> new ResourceNotFoundException("Produto Informado Não Cadastrado:" + lote.getProduct().getId()));
-        Stock stock = stockRepository.findByProductId(lote.getProduct().getId()).orElseThrow(() -> new RuntimeException("O stock dpara o produto não foi encontrado"));
 
-        if(!loteRepository.existsById(lote.getId())){
-            throw new ResourceNotFoundException("O lote Informado nao Existe. ID: "+lote.getId());
+    public StockMovementResponse createMovement(StockMoevementRequest request){
+        Product product = productRepository.findByIdAndStatusTrue(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado. ID: " + request.getProductId()));
+
+        Lote lote = loteRepository.findByIdAndStatusTrue(request.getLoteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Lote não encontrado. ID: " + request.getLoteId()));
+
+        User user = userRepository.findByIdAndStatusTrue(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado. ID: " + request.getUserId()));
+
+        Stock stock = stockRepository.findByProductId(product.getId())
+                .orElseThrow(() -> new StockNotFoundException("Estoque não encontrado para o produto. ID: " + product.getId()));
+
+
+        //testa se lote pertence ao produto
+        if (!lote.getProduct().getId().equals(product.getId())) {
+            throw new RuntimeException("O lote não pertence ao produto informado");
         }
 
+
+        // checa o tipo de movimentação e se o tipo de movimentação foi para retirar então checa se existe a quantidade suficiente
+        if (request.getTipo() == TipoStockMoviment.COMPRA || request.getTipo() == TipoStockMoviment.AJUSTE_POSITIVO ||
+                request.getTipo() == TipoStockMoviment.DEVOLUCAO) {
+
+            stock.setQuantidadeAtual(stock.getQuantidadeAtual() + request.getQuantidade());
+
+        } else {
+
+            if (stock.getQuantidadeAtual() > request.getQuantidade() || lote.getQuantProdutos() > request.getQuantidade()) {
+
+                lote.setQuantProdutos(lote.getQuantProdutos() - request.getQuantidade());
+                stock.setQuantidadeAtual(stock.getQuantidadeAtual() - request.getQuantidade());
+            }
+            else {
+                throw new InsufficientStock("Quantidade de produtos induficiente. Estoque Disponivel:" + stock.getQuantidadeAtual() + "Lote Disponivel: "+ lote.getQuantProdutos());
+
+            }
+        }
+
+        StockMovement movement = new StockMovement();
+        movement.setTipo(request.getTipo());
+        movement.setQuantidade(request.getQuantidade());
+        movement.setObservacao(request.getObservacao());
+        movement.setDataHora(LocalDateTime.now());
+        movement.setUser(user);
+        movement.setProduct(product);
+        movement.setLote(lote);
+        movement.setStatus(true);
+
+        loteRepository.save(lote);
         stockRepository.save(stock);
 
-        StockMovement stockMovement = new StockMovement();
-        stockMovement.setProduct(product);
-        stockMovement.setUser(u);
-        stockMovement.setTipo(TipoStockMoviment.COMPRA);
-        stockMovement.setQuantidade(quantidade);
-        stockMovement.setDataHora(LocalDateTime.now());
+        StockMovement savedMovement = SMRepository.save(movement);
+        return entityToDTO(savedMovement);
 
-        SMRepository.save(stockMovement);
+    }
 
-        return entityToDTO(stockMovement);
+
+    public void deleteMovement(Long movementId){
+        SMRepository.deleteById(movementId);
     }
 
 
     @Transactional
-    public void consumoItensFEFO(Long productId, int quantidade, User user) {
+    public StockMovementResponse entradaItens(StockMoevementRequest request) {
+
+        Lote lote = loteRepository.findByIdAndStatusTrue(request.getLoteId()).orElseThrow(()-> new ResourceNotFoundException("O lote informado não existe. ID : "+ request.getLoteId()));
+        User u = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserNotFoundException("Usuario não foi encontrado. ID: " + request.getUserId()));
+        Product product = productRepository.findByIdAndStatusTrue(request.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Produto Informado Não Cadastrado:" + request.getProductId()));
+        Stock stock = stockRepository.findByProductId(product.getId()).orElseThrow(() -> new RuntimeException("O stock para o produto não foi encontrado"));
+
+
+        lote.setQuantProdutos(lote.getQuantProdutos() + request.getQuantidade());
+        loteRepository.save(lote);
+
+        stock.setQuantidadeAtual(stock.getQuantidadeAtual() + request.getQuantidade());
+        stockRepository.save(stock);
+
+
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setProduct(product);
+        stockMovement.setUser(u);
+        stockMovement.setLote(lote);
+        stockMovement.setTipo(TipoStockMoviment.AJUSTE_POSITIVO);
+        stockMovement.setObservacao("Entrada de produtos - Lote: " + lote.getCodigo());
+        stockMovement.setQuantidade(request.getQuantidade());
+        stockMovement.setDataHora(LocalDateTime.now());
+        stockMovement.setStatus(true);
+
+        StockMovement savedMovement = SMRepository.save(stockMovement);
+        return entidadeToDTO(savedMovement);
+    }
+
+
+    @Transactional
+    public void consumoItensFEFO(Long productId, int quantidade, Long userId) {
 
         Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(()-> new ResourceNotFoundException("Produto informado não existe. ID:" + productId));
-        List<Lote> lotes = loteRepository.findByProductIdOrderByValidateAsc(productId); // alinha os produtos de um lote pela data de validade
+        List<Lote> lotes = loteRepository.findByProductIdOrderByValidateAsc(productId); // alinha os lotes por data de validade dos produtos
         Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new StockNotFoundException("Stock não encontrado para o produto" + productId));
+        User user = userRepository.findByIdAndStatusTrue(userId).orElseThrow(()-> new ResourceNotFoundException("Usuario informado não existe. ID : "+ userId));
+
 
         if (stock.getQuantidadeAtual()<quantidade) {
             throw new InsufficientStock("Estoque insuficiente. Estoque atual: "+stock.getQuantidadeAtual());
@@ -102,11 +175,14 @@ public class StockMovimentService {
             StockMovement movement = new StockMovement();
             movement.setProduct(product);
             movement.setUser(user);
+            movement.setLote(lote);
             movement.setTipo(TipoStockMoviment.VENDA);
             movement.setQuantidade(retirada);
             movement.setDataHora(LocalDateTime.now());
-
+            movement.setObservacao("Consumo FEFO - Lote: " + lote.getCodigo());
+            movement.setStatus(true);
             SMRepository.save(movement);
+
             restantes -= retirada;
 
         }
@@ -117,12 +193,12 @@ public class StockMovimentService {
     @Transactional
     public void consumoItens(Long productId, int quantidade, Long idUser, TipoStockMoviment tipoStockMoviment) {
 
-        Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(()-> new UserNotFoundException("Produto informado não existe. ID:" + productId));
-        Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new StockNotFoundException("Stock não encontrado para o produto" + productId));
+        Product product = productRepository.findByIdAndStatusTrue(productId).orElseThrow(()-> new ResourceNotFoundException("Produto informado não existe. ID:" + productId));
+        Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new ResourceNotFoundException("Stock não encontrado para o produto" + productId));
         User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
 
         if (stock.getQuantidadeAtual()<quantidade) {
-            throw new InsufficientStock("Estoque insuficiente. Estoque atual: "+stock.getQuantidadeAtual());
+            throw new InsufficientStock("Estoque insuficiente. Estoque atual: "+ stock.getQuantidadeAtual());
         }
 
         stock.setQuantidadeAtual(stock.getQuantidadeAtual()-quantidade);
@@ -134,6 +210,7 @@ public class StockMovimentService {
         movement.setTipo(tipoStockMoviment);
         movement.setQuantidade(quantidade);
         movement.setDataHora(LocalDateTime.now());
+        movement.setStatus(true);
 
         SMRepository.save(movement);
 
@@ -201,9 +278,10 @@ public class StockMovimentService {
 
         StockMovement stockMoevement = SMRepository.findById(idStockMoviment).orElseThrow(()-> new ResourceNotFoundException("A movimentação informada não existe. ID: "+idStockMoviment));
         User user = userRepository.findByIdAndStatusTrue(idUser).orElseThrow(() -> new ResourceNotFoundException("User informado não foi encontrado. ID: " + idUser));
+        Product product = productRepository.findByIdAndStatusTrue(request.getProductId()).orElseThrow(()-> new ResourceNotFoundException("O produto informado não existe. ID: "+request.getProductId()));
 
         stockMoevement.setQuantidade(request.getQuantidade());
-        stockMoevement.setProduct(request.getProduct());
+        stockMoevement.setProduct(product);
         stockMoevement.setDataHora(LocalDateTime.now());
         stockMoevement.setObservacao(request.getObservacao());
         stockMoevement.setTipo(request.getTipo());
@@ -245,11 +323,11 @@ public class StockMovimentService {
 
         Map<TipoStockMoviment, Integer> agrupado =
                 SMRepository.findAll()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        StockMovement::getTipo,
-                        Collectors.summingInt(StockMovement::getQuantidade)
-                ));
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                StockMovement::getTipo,
+                                Collectors.summingInt(StockMovement::getQuantidade)
+                        ));
 
         Integer totalGeral = agrupado.values().stream()
                 .mapToInt(Integer::intValue)
@@ -257,13 +335,13 @@ public class StockMovimentService {
 
         List<RelatorioTipoMovimentoDTO> relatorios =
                 agrupado.entrySet().stream()
-                .map(entry -> RelatorioTipoMovimentoDTO.builder()
-                        .tipo(entry.getKey().name())
-                        .quantidadeTotal(entry.getValue())
-                        .percentual(totalGeral > 0 ? (entry.getValue() * 100.0) / totalGeral : 0.0)
-                        .build())
-                .sorted(Comparator.comparing(RelatorioTipoMovimentoDTO::getQuantidadeTotal).reversed())
-                .collect(Collectors.toList());
+                        .map(entry -> RelatorioTipoMovimentoDTO.builder()
+                                .tipo(entry.getKey().name())
+                                .quantidadeTotal(entry.getValue())
+                                .percentual(totalGeral > 0 ? (entry.getValue() * 100.0) / totalGeral : 0.0)
+                                .build())
+                        .sorted(Comparator.comparing(RelatorioTipoMovimentoDTO::getQuantidadeTotal).reversed())
+                        .collect(Collectors.toList());
 
         return relatorios;
     }
@@ -275,6 +353,24 @@ public class StockMovimentService {
 
     private StockMovementResponse entityToDTO(StockMovement stockMovement){
         return modelMapper.map(stockMovement, StockMovementResponse.class);
+    }
+
+    private StockMovementResponse entidadeToDTO(StockMovement movement){
+
+        StockMovementResponse dto = new StockMovementResponse();
+        dto.setId(movement.getId());
+        dto.setTipo(movement.getTipo());
+        dto.setQuantidade(movement.getQuantidade());
+        dto.setObservacao(movement.getObservacao());
+        dto.setDataHora(movement.getDataHora());
+        dto.setUserId(movement.getUser().getId());
+        dto.setUserName(movement.getUser().getName());
+        dto.setLoteId(movement.getLote().getId());
+        dto.setLoteCodigo(movement.getLote().getCodigo());
+        dto.setProduct(movement.getProduct().getId());
+        dto.setProductName(movement.getProduct().getName());
+
+        return dto;
     }
 
 

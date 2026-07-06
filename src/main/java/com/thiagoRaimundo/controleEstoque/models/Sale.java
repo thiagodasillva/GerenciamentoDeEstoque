@@ -13,15 +13,23 @@ public class Sale {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "data_venda")
     private LocalDateTime dataVenda;
+
+    @Column(name = "valor_total")
     private BigDecimal valorTotal;
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
     private Set<SaleItem> itens = new HashSet<>();
     private Boolean status = true;
 
-    private LocalDateTime daleteAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime daletedAt;
+
+    @Column(name = "delete_by")
     private String deleteBy;
 
     public Sale() {
@@ -77,11 +85,11 @@ public class Sale {
     }
 
     public LocalDateTime getDaleteAt() {
-        return daleteAt;
+        return daletedAt;
     }
 
     public void setDaleteAt(LocalDateTime daleteAt) {
-        this.daleteAt = daleteAt;
+        this.daletedAt = daleteAt;
     }
 
     public String getDeleteBy() {

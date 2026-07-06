@@ -14,6 +14,7 @@ import java.util.List;
 @RequestMapping("api/stocks")
 public class StockController {
 
+
     private StockService stockService;
 
     public StockController(StockService stockService) {
@@ -26,7 +27,8 @@ public class StockController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StockResponse>> get(){
+    public ResponseEntity<List<StockResponse>> getAll(){
+
         return ResponseEntity.ok(stockService.getStocks());
     }
 
@@ -35,8 +37,8 @@ public class StockController {
         return ResponseEntity.ok(stockService.getStock(id));
     }
 
-    @GetMapping("/produt")
-    public ResponseEntity<StockResponse> getIdProduct (@PathVariable Long idProduto){
+    @GetMapping("/product/{idProduct}")
+    public ResponseEntity<StockResponse> getByProductId (@PathVariable Long idProduto){
         return ResponseEntity.ok(stockService.getStoctByProductId(idProduto));
     }
 
@@ -46,17 +48,10 @@ public class StockController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<List<StockResponse>> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable Long id){
         stockService.deleteLogico(id);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
-
-
-
 
 
 

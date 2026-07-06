@@ -12,9 +12,15 @@ public class Lote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
+    @Column(name = "quant_produtos")
     private Integer quantProdutos;
+
+    @Column(name = "codigo", unique = true)
     private String codigo;
+
+    @Column(name = "validate")
     private LocalDate validate;
     private Boolean status = true;
 
