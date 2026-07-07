@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.context.annotation.EnableMBeanExport;
 
@@ -15,6 +16,7 @@ public class Stock {
     private Long id;
     @OneToOne
     @JoinColumn(name = "product_id",unique = true)
+    @JsonIgnore
     private Product product;
 
     @Column(name = "quantidade_atual")
