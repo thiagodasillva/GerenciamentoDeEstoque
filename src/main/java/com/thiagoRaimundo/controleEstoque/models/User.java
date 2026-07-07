@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiagoRaimundo.controleEstoque.models.Enum.TipoUser;
 import jakarta.persistence.*;
 
@@ -27,6 +28,7 @@ public class User {
     private TipoUser tipoUser;
     private Boolean status = true;
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private Collection<StockMovement> stockMovement;
 
 

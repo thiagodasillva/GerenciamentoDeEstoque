@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Collection;
@@ -21,6 +22,7 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product")
+    @JsonIgnore
     private Collection<Lote> lotes;
 
     @OneToOne(mappedBy = "product")

@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Category {
     @Column(name = "description")
     private String description;
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private Collection<Product> products;
     private Boolean status = true;
 

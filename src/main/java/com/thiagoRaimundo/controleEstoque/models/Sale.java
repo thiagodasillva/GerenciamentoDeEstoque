@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.cglib.core.Local;
 
@@ -23,6 +24,7 @@ public class Sale {
     @JoinColumn(name = "user_id")
     private User user;
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<SaleItem> itens = new HashSet<>();
     private Boolean status = true;
 
