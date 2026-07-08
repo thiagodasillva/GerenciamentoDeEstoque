@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class LoteResponse {
 
     private Long id;
-    private Product product;
+    private Long product;
     private String productName;
     private Integer quantProdutos;
     private String codigo;

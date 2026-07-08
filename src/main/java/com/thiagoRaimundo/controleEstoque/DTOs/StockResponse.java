@@ -16,7 +16,8 @@ import lombok.Setter;
 public class StockResponse {
 
     private Long id;
-    private Product product;
+    private long product;
+    private String productName;
     private Integer quantidadeAtual;
     private Integer quantidadeMinima;
     private Integer quantidadeMaxima;

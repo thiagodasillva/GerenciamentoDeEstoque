@@ -19,14 +19,11 @@ public class ProductResponse {
 
 
     private Long id;
-
     private String name;
-
     private String description;
-
-    private Category category;
+    private Long category;
+    private String categoryName;
     private Collection<Lote> lotes;
-
     private Boolean status = true;
 
 
