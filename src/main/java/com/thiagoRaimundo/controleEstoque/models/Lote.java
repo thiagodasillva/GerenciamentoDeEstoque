@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ public class Lote {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @JsonIgnore
     private Product product;
     @Column(name = "quant_produtos")
     private Integer quantProdutos;

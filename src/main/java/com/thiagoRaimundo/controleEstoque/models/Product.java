@@ -19,6 +19,7 @@ public class Product {
     private String description;
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @JsonIgnore
     private Category category;
 
     @OneToMany(mappedBy = "product")

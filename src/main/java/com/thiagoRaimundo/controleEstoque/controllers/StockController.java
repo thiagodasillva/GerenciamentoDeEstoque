@@ -28,7 +28,6 @@ public class StockController {
 
     @GetMapping
     public ResponseEntity<List<StockResponse>> getAll(){
-
         return ResponseEntity.ok(stockService.getStocks());
     }
 
