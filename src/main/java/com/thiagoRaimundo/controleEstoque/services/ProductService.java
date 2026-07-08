@@ -28,16 +28,16 @@ public class ProductService {
 
     public ProductResponse getProduct(Long idProduct){
         Product product = productRepository.findByIdAndStatusTrue(idProduct).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo. ID: "+ idProduct));
-        return entityToDto(product);
+        return entidadeToDTO(product);
     }
 
     public ProductResponse getByName(String name){
         Product product = productRepository.findByNameAndStatusTrue(name).orElseThrow(()-> new ResourceNotFoundException("Produto não encontrdo, Nome: "+ name));
-        return entityToDto(product);
+        return entidadeToDTO(product);
     }
 
     public List<ProductResponse> getProducts(){
-        return productRepository.findByStatusTrue().stream().map(this::entityToDto).toList();
+        return productRepository.findByStatusTrue().stream().map(this::entidadeToDTO).toList();
     }
 
     @Transactional
@@ -52,7 +52,7 @@ public class ProductService {
 
         Product savefProduct = productRepository.save(product);
 
-        return entityToDto(product);
+        return entidadeToDTO(savefProduct);
     }
 
 
@@ -78,7 +78,7 @@ public class ProductService {
         }
 
         Product updatedProduct = productRepository.save(product);
-        return entityToDto(updatedProduct);
+        return entidadeToDTO(updatedProduct);
 
     }
 
@@ -88,11 +88,12 @@ public class ProductService {
             throw new ResourceNotFoundException("A Categoria informada não existe. ID: "+ idCategory);
         }
 
-        return productRepository.findByCategoryIdAndStatusTrue(idCategory).stream().map(this::entityToDto).toList();
+        return productRepository.findByCategoryIdAndStatusTrue(idCategory).stream().map(this::entidadeToDTO).toList();
 
     }
 
 
+    //caiu em desuso
     private ProductResponse entityToDto(Product product){
         return modelMapper.map(product, ProductResponse.class);
     }
@@ -101,6 +102,18 @@ public class ProductService {
         return modelMapper.map(productRequest,Product.class);
     }
 
+
+    private ProductResponse entidadeToDTO(Product product){
+        ProductResponse response = new ProductResponse();
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setDescription(product.getDescription());
+        response.setCategory(product.getCategory().getId());
+        response.setCategoryName(product.getCategory().getName());
+        response.setStatus(product.getStatus());
+
+        return response;
+    }
 
 
 }

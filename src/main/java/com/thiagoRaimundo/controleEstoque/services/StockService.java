@@ -50,14 +50,14 @@ public class StockService {
 
 
         Stock savedStock = stockRepository.save(stock);
-        return entityToDto(savedStock);
+        return entidadeToDTO(savedStock);
     }
 
 
     public StockResponse getStock(Long idStock){
         Stock stock = stockRepository.findById(idStock)
                 .orElseThrow(()-> new RuntimeException("O estoque informado não existe. ID: "+idStock));
-        return entityToDto(stock);
+        return entidadeToDTO(stock);
     }
 
     public StockResponse getStoctByProductId(Long idProduct){
@@ -69,14 +69,14 @@ public class StockService {
         Stock stock = stockRepository.findByProductId(idProduct)
                 .orElseThrow(() -> new ResourceNotFoundException("Não existe um estoque com para esse produto. ID produto: "+ idProduct));
 
-        return entityToDto(stock);
+        return entidadeToDTO(stock);
 
     }
 
     public List<StockResponse> getStocks(){
         return stockRepository.findAll()
                 .stream()
-                .map(this::entityToDto)
+                .map(this::entidadeToDTO)
                 .toList();
     }
 
@@ -95,7 +95,7 @@ public class StockService {
         stock.setQuantidadeMaxima(stockRequest.getQuantidadeMaxima());
 
         Stock updatedStock = stockRepository.save(stock);
-        return entityToDto(updatedStock);
+        return entidadeToDTO(updatedStock);
 
     }
 
@@ -111,7 +111,7 @@ public class StockService {
 
 
     @Transactional
-    public void updateQuantidade(Long productId, Integer quantidade, boolean isEntrada) {
+    public StockResponse updateQuantidade(Long productId, Integer quantidade, boolean isEntrada) {
         Stock stock = stockRepository.findByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Estoque não encontrado para o produto. ID: " + productId));
 
@@ -125,17 +125,33 @@ public class StockService {
             stock.setQuantidadeAtual(stock.getQuantidadeAtual() - quantidade);
         }
 
-        stockRepository.save(stock);
+        Stock savedStock = stockRepository.save(stock);
+
+        return entidadeToDTO(savedStock);
     }
 
     private Stock DTOToEntity(StockRequest stockRequest){
         return modelMapper.map(stockRequest, Stock.class);
     }
 
+    //caiu em desuso
     private StockResponse entityToDto(Stock stock){
         return modelMapper.map(stock, StockResponse.class);
     }
 
+
+    private StockResponse entidadeToDTO(Stock stock){
+        StockResponse response = new StockResponse();
+        response.setId(stock.getId());
+        response.setProduct(stock.getProduct().getId());
+        response.setProductName(stock.getProduct().getName());
+        response.setQuantidadeAtual(stock.getQuantidadeAtual());
+        response.setQuantidadeMinima(stock.getQuantidadeMinima());
+        response.setQuantidadeMaxima(stock.getQuantidadeMaxima());
+        response.setStatus(stock.getStatus());
+
+        return response;
+    }
 
 
 }

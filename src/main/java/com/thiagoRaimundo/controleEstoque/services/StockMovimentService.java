@@ -100,7 +100,7 @@ public class StockMovimentService {
         stockRepository.save(stock);
 
         StockMovement savedMovement = SMRepository.save(movement);
-        return entityToDTO(savedMovement);
+        return entidadeToDTO(savedMovement);
 
     }
 
@@ -294,28 +294,28 @@ public class StockMovimentService {
 
 
     public Page<StockMovementResponse> listarMovimentosPorProduto(Long productId, Pageable pageable) {
-        return SMRepository.findByProductIdOrderByDataHoraDesc(productId, pageable).map(this::entityToDTO);
+        return SMRepository.findByProductIdOrderByDataHoraDesc(productId, pageable).map(this::entidadeToDTO);
     }
 
     public Page<StockMovementResponse> listarMovimentosPorTipo(TipoStockMoviment tipo, Pageable pageable) {
-        return SMRepository.findByTipoOrderByDataHoraDesc(tipo, pageable).map(this::entityToDTO);
+        return SMRepository.findByTipoOrderByDataHoraDesc(tipo, pageable).map(this::entidadeToDTO);
     }
 
     public Page<StockMovementResponse> listarMovimentosPorUsuario(Long userId, Pageable pageable) {
         return SMRepository.findByUserIdOrderByDataHoraDesc(userId, pageable)
-                .map(this::entityToDTO);
+                .map(this::entidadeToDTO);
     }
 
 
     public List<StockMovementResponse> listarMovimentosPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         return SMRepository.findByDataHoraBetween(inicio, fim, PageRequest.of(0,10))
                 .stream()
-                .map(this::entityToDTO).collect(Collectors.toList());
+                .map(this::entidadeToDTO).collect(Collectors.toList());
     }
 
     public StockMovementResponse buscarMovimentacaoPorID(Long idMovimentacao){
         StockMovement stockMovement = SMRepository.findById(idMovimentacao).orElseThrow(()-> new ResourceNotFoundException("Movimentação com o ID: "+idMovimentacao+" não foi encontrado."));
-        return entityToDTO(stockMovement);
+        return entidadeToDTO(stockMovement);
 
     }
 

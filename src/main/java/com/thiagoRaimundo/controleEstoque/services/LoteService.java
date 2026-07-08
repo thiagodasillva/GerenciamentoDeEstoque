@@ -47,7 +47,7 @@ public class LoteService {
 
 
         Lote saverLote = loteRepository.save(lote);
-        return entityToDTO(saverLote);
+        return entidadeToDTO(saverLote);
 
     }
 
@@ -55,7 +55,7 @@ public class LoteService {
 
         return loteRepository.findByStatusTrue()
                 .stream()
-                .map(this:: entityToDTO)
+                .map(this:: entidadeToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -63,13 +63,13 @@ public class LoteService {
     public LoteResponse getLoteById(Long idLote){
         Lote lote = loteRepository.findByIdAndStatusTrue(idLote)
                 .orElseThrow(() -> new ResourceNotFoundException("Não Foi encontrado nenhum lote com o ID: "+ idLote));
-        return entityToDTO(lote);
+        return entidadeToDTO(lote);
     }
 
     public LoteResponse getLoteByCodigo(String codigoLote){
         Lote lote = loteRepository.findByCodigoAndStatusTrue(codigoLote)
                 .orElseThrow(() -> new ResourceNotFoundException("Não Foi encontrado nenhum lote com o Codigo: "+ codigoLote));
-        return entityToDTO(lote);
+        return entidadeToDTO(lote);
     }
 
 
@@ -79,7 +79,7 @@ public class LoteService {
         }
         return loteRepository.findByProductIdAndStatusTrueOrderByValidateAsc(idProduct)
                 .stream()
-                .map(this::entityToDTO)
+                .map(this::entidadeToDTO)
                 .toList();
 
     }
@@ -113,7 +113,7 @@ public class LoteService {
 
         Lote updatedLote= loteRepository.save(lote);
 
-        return entityToDTO(updatedLote);
+        return entidadeToDTO(updatedLote);
     }
 
 
@@ -121,9 +121,24 @@ public class LoteService {
         return modelMapper.map(request, Lote.class);
     }
 
+    //caiu em desuso
     private LoteResponse entityToDTO(Lote lote){
         return modelMapper.map(lote, LoteResponse.class);
 
+    }
+
+    private LoteResponse entidadeToDTO(Lote lote){
+        LoteResponse loteResponse = new LoteResponse();
+
+        loteResponse.setId(lote.getId());
+        loteResponse.setProduct(lote.getProduct().getId());
+        loteResponse.setProductName(lote.getProduct().getName());
+        loteResponse.setQuantProdutos(lote.getQuantProdutos());
+        loteResponse.setCodigo(lote.getCodigo());
+        loteResponse.setValidate(lote.getValidate());
+        loteResponse.setStatus(lote.getStatus());
+
+        return  loteResponse;
     }
 
 
