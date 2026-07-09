@@ -48,6 +48,11 @@ public class SaleController {
         return ResponseEntity.ok(saleService.realizarVenda(request));
     }
 
+    @PostMapping("/povoar")
+    public ResponseEntity<SaleResponse> criarVendapovoar(@Valid @RequestBody SaleRequest request) {
+        return ResponseEntity.ok(saleService.realizarVendaData(request));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SaleResponse> atualizarVenda(@PathVariable Long id, @RequestBody SaleRequest request) {
         return ResponseEntity.ok(saleService.updateSale(id, request));
