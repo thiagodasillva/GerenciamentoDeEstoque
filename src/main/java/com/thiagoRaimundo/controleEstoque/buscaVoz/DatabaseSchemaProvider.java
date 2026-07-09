@@ -98,12 +98,18 @@ public class DatabaseSchemaProvider {
                 - Para buscas de texto (nomes de produtos), utilize LOWER(nome_da_coluna) LIKE '%termo%' para ignorar maiúsculas/minúsculas e buscar palavras parciais.
                 - Prefira joins explícitos (INNER JOIN, LEFT JOIN) em vez de joins implícitos.
                 
-                
                 EXEMPLOS DE CONSULTAS COMUNS:
-                
-                Linguagem Natural: "Liste todos os produtos da categoria 'Eletrônicos'"
-                SQL:
-                
+                               
+                - Linguagem Natural: "Liste todos os produtos da categoria 'Eletrônicos'"
+                 SQL: SELECT p.name FROM tb_produto p INNER JOIN tb_category c ON p.category_id = c.id WHERE LOWER(c.name) LIKE '%eletrônicos%' AND p.status = TRUE AND c.status = TRUE;
+                - Linguagem Natural: "quantos produtos existem no estoque"
+                 SQL: SELECT p.name AS produto, s.quantidade_atual AS quantidade FROM tb_produto p INNER JOIN tb_stock s ON p.product_id = s.product_id WHERE p.status = TRUE AND s.status = TRUE;
+                - Linguagem Natural: "quantos quilos de arroz existem no estoque"
+                 SQL: SELECT p.name AS produto, s.quantidade_atual AS quantidade FROM tb_produto p INNER JOIN tb_stock s ON p.product_id = s.product_id WHERE LOWER(p.name) LIKE '%arroz%' AND p.status = TRUE AND s.status = TRUE;
+                - Linguagem Natural: "qual o produto com a menos quantidade"
+                 SQL: SELECT p.name AS produto, s.quantidade_atual AS quantidade FROM tb_produto p INNER JOIN tb_stock s ON p.product_id = s.product_id WHERE p.status = TRUE AND s.status = TRUE ORDER BY s.quantidade_atual ASC LIMIT 1;
+                - Linguagem Natural: "quanto tempo o produto x vai durar"
+                  SQL: WITH consumo_recente AS (SELECT si.product_id, COALESCE(SUM(si.quantidade), 0) AS total_vendido FROM tb_sale_item si INNER JOIN tb_sale sa ON si.sale_id = sa.id WHERE sa.data_venda >= CURRENT_TIMESTAMP - INTERVAL '30 days' AND sa.status = TRUE GROUP BY si.product_id) SELECT p.name AS produto, s.quantidade_atual AS estoque_atual, CASE WHEN COALESCE(cr.total_vendido, 0) = 0 THEN NULL ELSE ROUND((s.quantidade_atual * 30.0) / cr.total_vendido, 1) END AS dias_restantes FROM tb_produto p INNER JOIN tb_stock s ON p.product_id = s.product_id LEFT JOIN consumo_recente cr ON p.product_id = cr.product_id WHERE LOWER(p.name) LIKE '%x%' AND p.status = TRUE AND s.status = TRUE;
                 
                 """;
     }

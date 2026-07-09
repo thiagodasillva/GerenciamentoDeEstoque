@@ -46,16 +46,16 @@ public class SaleItemService{
         saleItem.setValorVenda(itemRequest.getValorVenda());
 
         SaleItem savedSaleItem = itemRepository.save(saleItem);
-        return entityToDTO(savedSaleItem);
+        return entidadeToDTO(savedSaleItem);
     }
 
     public List<SaleItemResponse> getItens(){
-        return itemRepository.findAll().stream().map(this::entityToDTO).toList();
+        return itemRepository.findAll().stream().map(this::entidadeToDTO).toList();
 
     }
     public SaleItemResponse getItemID(Long idSaleItem){
         SaleItem saleItem = itemRepository.findById(idSaleItem).orElseThrow(()-> new ResourceNotFoundException("O Item não existe. ID: "+ idSaleItem));
-        return entityToDTO(saleItem);
+        return entidadeToDTO(saleItem);
     }
 
     public List<SaleItemResponse> getItensByProductId(Long idProduct){
@@ -64,7 +64,7 @@ public class SaleItemService{
             throw new ResourceNotFoundException("O produto informado não existe. ID: "+ idProduct);
         }
 
-        return itemRepository.findByProductId(idProduct).stream().map(this::entityToDTO).toList();
+        return itemRepository.findByProductId(idProduct).stream().map(this::entidadeToDTO).toList();
     }
 
     public SaleItemResponse updateSaleItem(Long idSaleItem, SaleItemRequest saleItemRequest){
@@ -85,7 +85,7 @@ public class SaleItemService{
         saleItem.setProduct(product);
 
         itemRepository.save(saleItem);
-        return entityToDTO(saleItem);
+        return entidadeToDTO(saleItem);
 
     }
 
@@ -103,6 +103,18 @@ public class SaleItemService{
 
     private SaleItemResponse entityToDTO(SaleItem saleItem){
         return modelMapper.map(saleItem, SaleItemResponse.class);
+    }
+
+    private SaleItemResponse entidadeToDTO(SaleItem saleItem){
+        SaleItemResponse response= new SaleItemResponse();
+        response.setId(saleItem.getId());
+        response.setQuantidade(saleItem.getQuantidade());
+        response.setSubTotal(saleItem.getValorVenda());
+        response.setValorVenda(saleItem.getValorVenda());
+        response.setProductId(saleItem.getProduct().getId());
+        response.setProductName(saleItem.getProduct().getName());
+
+        return response;
     }
 
 
