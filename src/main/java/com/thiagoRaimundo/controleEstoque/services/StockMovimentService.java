@@ -75,7 +75,7 @@ public class StockMovimentService {
 
         } else {
 
-            if (stock.getQuantidadeAtual() > request.getQuantidade() || lote.getQuantProdutos() > request.getQuantidade()) {
+            if (stock.getQuantidadeAtual() >= request.getQuantidade() && lote.getQuantProdutos() >= request.getQuantidade()) {
 
                 lote.setQuantProdutos(lote.getQuantProdutos() - request.getQuantidade());
                 stock.setQuantidadeAtual(stock.getQuantidadeAtual() - request.getQuantidade());
@@ -306,6 +306,10 @@ public class StockMovimentService {
                 .map(this::entidadeToDTO);
     }
 
+    public List<StockMovementResponse> listarMoviments(){
+        return SMRepository.findAll().stream().map(this::entidadeToDTO).toList();
+    }
+
 
     public List<StockMovementResponse> listarMovimentosPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         return SMRepository.findByDataHoraBetween(inicio, fim, PageRequest.of(0,10))
@@ -367,7 +371,7 @@ public class StockMovimentService {
         dto.setUserName(movement.getUser().getName());
         dto.setLoteId(movement.getLote().getId());
         dto.setLoteCodigo(movement.getLote().getCodigo());
-        dto.setProduct(movement.getProduct().getId());
+        dto.setProductId(movement.getProduct().getId());
         dto.setProductName(movement.getProduct().getName());
 
         return dto;

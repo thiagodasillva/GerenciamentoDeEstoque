@@ -38,7 +38,7 @@ public class StockMovementController {
     }
 
     @PostMapping("/consumo")
-    public ResponseEntity<Void> consumoItens( @RequestParam Long productId,@RequestParam int quantidade,@RequestParam Long userId,TipoStockMoviment tipo) {
+    public ResponseEntity<Void> consumoItens( @RequestParam Long productId,@RequestParam int quantidade,@RequestParam Long userId,@RequestParam TipoStockMoviment tipo) {
         stockMovimentService.consumoItens(productId, quantidade, userId, tipo);
         return ResponseEntity.ok().build();
     }
@@ -89,6 +89,11 @@ public class StockMovementController {
     @GetMapping("/usuario/{userId}")
     public ResponseEntity<Page<StockMovementResponse>> listarPorUsuario(@PathVariable Long userId, @PageableDefault(size = 10,page = 0) Pageable pageable) {
         return ResponseEntity.ok(stockMovimentService.listarMovimentosPorUsuario(userId, pageable));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<StockMovementResponse>> listarMoviments(){
+        return ResponseEntity.ok(stockMovimentService.listarMoviments());
     }
 
     @DeleteMapping("/{id}")

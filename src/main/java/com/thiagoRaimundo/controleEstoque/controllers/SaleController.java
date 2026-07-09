@@ -44,7 +44,7 @@ public class SaleController {
     }
 
     @PostMapping
-    public ResponseEntity<SaleResponse> criarVenda(@RequestBody SaleRequest request) {
+    public ResponseEntity<SaleResponse> criarVenda(@Valid @RequestBody SaleRequest request) {
         return ResponseEntity.ok(saleService.realizarVenda(request));
     }
 

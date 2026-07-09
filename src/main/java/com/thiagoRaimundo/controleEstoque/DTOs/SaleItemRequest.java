@@ -31,10 +31,9 @@ public class SaleItemRequest {
     private Integer quantidade;
 
 
-    @NotNull
+    @NotNull(message = "O ID do produto deve ser informado")
     private Long productId;
 
-    @NotNull
     private Long saleId;
 
 }

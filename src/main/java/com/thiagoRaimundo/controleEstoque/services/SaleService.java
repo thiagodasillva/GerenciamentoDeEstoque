@@ -159,6 +159,46 @@ public class SaleService {
         return entityToDTO(sale);
     }
 
+    @Transactional
+    public SaleResponse realizarVendaData(SaleRequest dto) {
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
+        Sale sale = new Sale();
+        sale.setUser(user);
+        sale.setDataVenda(dto.getDataVenda());
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (SaleItemRequest itemDTO : dto.getItens()) {
+
+            Product product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado. ID: "+ itemDTO.getProductId()));
+
+            stockMovimentService.consumoItens(product.getId(), itemDTO.getQuantidade(),user.getId(), TipoStockMoviment.VENDA);
+
+            SaleItem item = new SaleItem();
+            item.setSale(sale);
+            item.setProduct(product);
+            item.setQuantidade(itemDTO.getQuantidade());
+            item.setValorVenda(itemDTO.getValorVenda());
+
+            BigDecimal subtotal = itemDTO.getValorVenda()
+                    .multiply(BigDecimal.valueOf(itemDTO.getQuantidade()));
+
+            item.setSubTotal(subtotal);
+            sale.getItens().add(item);
+
+            total = total.add(subtotal);
+        }
+
+        sale.setValorTotal(total);
+        saleRepository.save(sale);
+
+        return entityToDTO(sale);
+    }
+
 
     @Transactional
     public SaleResponse updateSale(Long idSale, SaleRequest saleRequest){

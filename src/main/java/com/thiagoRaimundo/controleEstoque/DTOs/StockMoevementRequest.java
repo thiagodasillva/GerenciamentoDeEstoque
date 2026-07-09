@@ -33,7 +33,7 @@ public class StockMoevementRequest {
     private Long productId;
 
     @NotNull(message = "O ID do usuário deve ser informado")
-    private long userId;
+    private Long userId;
 
 
 }

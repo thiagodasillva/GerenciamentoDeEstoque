@@ -14,7 +14,7 @@ import java.util.Set;
 public class SaleRequest {
 
     @NotNull(message = "Informar a data é obrigatorio")
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime dataVenda;
 
     @NotNull(message = "o valor total da venda deve ser informado")

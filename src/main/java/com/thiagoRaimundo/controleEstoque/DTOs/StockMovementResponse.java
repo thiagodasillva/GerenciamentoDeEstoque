@@ -22,9 +22,9 @@ public class StockMovementResponse {
     private LocalDateTime dataHora;
     private Long userId;
     private String userName ;
-    private long loteId;
+    private Long loteId;
     private String loteCodigo;
-    private long product;
+    private Long productId;
     private String productName;
 
 

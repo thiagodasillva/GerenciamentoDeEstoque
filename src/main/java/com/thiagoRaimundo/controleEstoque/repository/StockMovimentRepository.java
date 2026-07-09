@@ -17,4 +17,5 @@ public interface StockMovimentRepository extends JpaRepository<StockMovement,Lon
     Page<StockMovement> findByTipoOrderByDataHoraDesc(TipoStockMoviment tipo, Pageable pageable);
     Page<StockMovement> findByUserIdOrderByDataHoraDesc(Long id, Pageable page);
     Page<StockMovement> findByDataHoraBetween(LocalDateTime inicio, LocalDateTime fim, Pageable pageable);
+
 }
