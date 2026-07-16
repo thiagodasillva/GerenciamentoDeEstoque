@@ -1,5 +1,7 @@
 package com.thiagoRaimundo.controleEstoque.buscaVoz;
 
+import com.thiagoRaimundo.controleEstoque.exceptions.BuscaForaDeEscopoException;
+import com.thiagoRaimundo.controleEstoque.exceptions.ValidacaoQueryException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -27,13 +29,16 @@ public class GeminiAssistendService {
     public String gerarSql(String perguntaUsuario) {
         String schema = databaseSchemaProvider.getSchemaDescription();
         String prompt = String.format("""
-            %s
-            
-            Com base no esquema acima, responda APENAS com o comando SQL (sem formatação markdown, sem explicações) para esta pergunta:
-            "%s"
-            """, schema, perguntaUsuario);
+                %s
+                DIRETRIZ CRÍTICA DE ESCOPO:
+                Avalie se a pergunta do usuário faz sentido e se está relacionada estritamente ao controle de estoque, produtos, categorias, lotes, vendas ou movimentações do esquema acima.
+                Se a pergunta for incoerente, for uma saudação sem pergunta subsequente, ou se referir a assuntos totalmente alheios (ex: culinária, política, piadas, clima), você deve responder RIGOROSAMENTE apenas com a palavra: FORA_DE_ESCOPO
+                Caso contrário, responda APENAS com o comando SQL válido (sem formatação markdown, sem explicações).
+                               
+                Pergunta do Usuário:
+                "%s"
+                """, schema, perguntaUsuario);
 
-        // Chamada para o Gemini
         String resposta = webClient.post()
                 .uri(apiURL + "?key=" + key)
                 .header("Content-Type", "application/json")
@@ -47,7 +52,14 @@ public class GeminiAssistendService {
                 .map(this::extrairTextoResposta)
                 .block();
 
-        return limparSql(resposta);
+
+        String sqlGerado = limparSql(resposta);
+
+        if ("FORA_DE_ESCOPO".equalsIgnoreCase(sqlGerado) || sqlGerado.isEmpty()){
+            throw new BuscaForaDeEscopoException("Desculpe, ó consigo responder perguntas ligadas ao controle de estoque.");
+        }
+
+        return sqlGerado;
     }
 
     private String limparSql(String resposta) {
@@ -57,20 +69,26 @@ public class GeminiAssistendService {
     }
 
     private String extrairTextoResposta(String json) {
-        try{ // Parse simples (use Jackson) para extrair o texto do candidato
+        try{
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(json);
 
-            return root
-                    .path("candidates")
-                    .get(0)
+            JsonNode candidates = root.path("candidates");
+            if(candidates.isMissingNode() || candidates.isEmpty()){
+                throw new ValidacaoQueryException("A IA não conseguiu processas sua pergunta por motivos de segurança ou moderação");
+            }
+
+            return candidates.get(0)
                     .path("content")
                     .path("parts")
                     .get(0)
                     .path("text")
                     .asText();}
+        catch (ValidacaoQueryException e){
+            throw e;
+        }
         catch (Exception e){
-            throw new RuntimeException("Falha ao parsear resposta do Gemini", e);
+            throw new RuntimeException("Falha ao ler os dados da inteligencia artificial", e);
         }
 
 

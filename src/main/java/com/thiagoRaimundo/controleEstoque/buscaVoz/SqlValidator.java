@@ -1,5 +1,6 @@
 package com.thiagoRaimundo.controleEstoque.buscaVoz;
 
+import com.thiagoRaimundo.controleEstoque.exceptions.ValidacaoQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
@@ -15,15 +16,14 @@ import java.util.List;
 public class SqlValidator {
 
     public void validateAndSanitize(String sql) {
-        // 1. Parse da instrução usando JSqlParser
+        // Parse da instrução usando JSqlParser
 
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         try {
             Statement statement = parserManager.parse(new StringReader(sql));
 
-            // 2. Permite apenas SELECT
             if (!(statement instanceof Select)) {
-                throw new SecurityException("Apenas consultas SELECT são permitidas.");
+                throw new ValidacaoQueryException("Apenas consultas SELECT são permitidas.");
             }
 
             // inspecionar as tabelas referenciadas (evitar acesso a tabelas sensíveis)
@@ -35,14 +35,14 @@ public class SqlValidator {
                 }
             }
 
-            // 4. Opcional: limitar cláusulas perigosas (INTO OUTFILE, etc.)
+            // limitar cláusulas perigosas (INTO OUTFILE, etc.)
             if (sql.toUpperCase().contains("INTO OUTFILE") ||
                     sql.toUpperCase().contains("INTO DUMPFILE")) {
                 throw new SecurityException("Cláusula não permitida.");
             }
 
         } catch (JSQLParserException e) {
-            throw new IllegalArgumentException("SQL inválido gerado pelo Gemini: " + e.getMessage());
+            throw new ValidacaoQueryException("SQL inválido gerado pelo Gemini: " + e.getMessage());
         }
     }
 }

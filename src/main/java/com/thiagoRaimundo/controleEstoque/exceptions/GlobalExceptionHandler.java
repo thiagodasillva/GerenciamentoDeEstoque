@@ -135,6 +135,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
+    // manupulação de exception para o comando de voz
+
+    @ExceptionHandler(BuscaForaDeEscopoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleBuscaForaDeEscopoException(BuscaForaDeEscopoException ex, WebRequest request){
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+
+    }
+
+    @ExceptionHandler(TranscricaoAudioExceptionException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ResponseEntity<Object> handleTranscricaoAudioExceptionException(TranscricaoAudioExceptionException ex, WebRequest request){
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
+    }
+
+    @ExceptionHandler(ValidacaoQueryException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleValidacaoQueryException(ValidacaoQueryException ex, WebRequest request){
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+
 
 
 
@@ -159,5 +184,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if(enableTrace) errorResponse.setStackTrace(Utils.getStackTrace(exception));
         return ResponseEntity.status(httpStatus).body(errorResponse);
     }
+
+
 
 }
