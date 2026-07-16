@@ -91,7 +91,7 @@ public class DatabaseSchemaProvider {
                             FOREIGN KEY (sale_id) REFERENCES tb_sale(id) ON DELETE CASCADE
                             
                 Regras:
-                - Use apenas SELECT para consultas.
+                - Use apenas SELECT para consultas.s
                 - Não use DELETE, DROP, UPDATE, INSERT.
                 - Sempre retorne apenas a query SQL, sem explicações.
                 - Para buscas de texto (nomes de produtos), utilize LOWER(nome_da_coluna) LIKE '%termo%' para ignorar maiúsculas/minúsculas e buscar palavras parciais.
@@ -104,6 +104,12 @@ public class DatabaseSchemaProvider {
                                   * Para perguntas de quantidade física total de itens: use 'quantidade_total' ou 'total_itens'.
                                   * Para buscas de maior/menor elemento: use 'maior_venda' ou 'menor_quantidade'.
                                   * Evite siglas ou nomes genéricos como 'res', 'total' ou 'qtd'.
+                - NUNCA tente formatar valores ou unidades de medida diretamente no comando SQL (como concatenar textos como 'R$', 'dias' ou 'kg'). Sempre retorne os resultados numéricos como números puros (DECIMAL, INT, etc.), pois o sistema backend cuidará da formatação visual automaticamente.
+                - Se o usuário realizar uma pesquisa informando APENAS o nome de um produto (ex: "Arroz", "Feijão" ou apenas um nome sem comando explícito de pergunta), você deve assumir por padrão que ele deseja uma "ficha rápida" deste produto. Retorne obrigatoriamente:
+                                  . O nome do produto (AS nome_produto).
+                                  . A quantidade atual disponível no estoque (AS quantidade_no_estoque).
+                                  . O total de vendas individuais realizadas para este produto (AS total_vendas_realizadas).
+                                  . A quantidade física total acumulada que já foi vendida (AS total_itens_vendidos).
                 
                 EXEMPLOS DE CONSULTAS COMUNS:
                                
@@ -119,7 +125,8 @@ public class DatabaseSchemaProvider {
                   SQL: WITH consumo_recente AS (SELECT si.product_id, COALESCE(SUM(si.quantidade), 0) AS total_vendido FROM tb_sale_item si INNER JOIN tb_sale sa ON si.sale_id = sa.id WHERE sa.data_venda >= CURRENT_TIMESTAMP - INTERVAL '30 days' AND sa.status = TRUE GROUP BY si.product_id) SELECT p.name AS produto, s.quantidade_atual AS estoque_atual, CASE WHEN COALESCE(cr.total_vendido, 0) = 0 THEN NULL ELSE ROUND((s.quantidade_atual * 30.0) / cr.total_vendido, 1) END AS dias_restantes FROM tb_produto p INNER JOIN tb_stock s ON p.product_id = s.product_id LEFT JOIN consumo_recente cr ON p.product_id = cr.product_id WHERE LOWER(p.name) LIKE '%x%' AND p.status = TRUE AND s.status = TRUE;
                 - Linguagem Natural: "quantos porcentos representa a venda do produto x do numero de vendas atual"
                   SQL: WITH total_vendas AS (SELECT COALESCE(SUM(si.quantidade), 0) AS total FROM tb_sale_item si INNER JOIN tb_sale sa ON si.sale_id = sa.id WHERE sa.status = TRUE), produto_vendas AS (SELECT COALESCE(SUM(si.quantidade), 0) AS quantidade FROM tb_sale_item si INNER JOIN tb_sale sa ON si.sale_id = sa.id INNER JOIN tb_produto p ON si.product_id = p.product_id WHERE LOWER(p.name) LIKE '%x%' AND sa.status = TRUE) SELECT ROUND((pv.quantidade * 100.0) / tv.total, 2) AS percentual FROM total_vendas tv, produto_vendas pv;
-                
+                Linguagem Natural: "Arroz"
+                  SQL: SELECT p.name AS nome_produto, s.quantidade_atual AS quantidade_no_estoque, COUNT(DISTINCT si.sale_id) AS total_vendas_realizadas, COALESCE(SUM(si.quantidade), 0) AS total_itens_vendidos FROM tb_produto p INNER JOIN tb_stock s ON p.product_id = s.product_id LEFT JOIN tb_sale_item si ON p.product_id = si.product_id LEFT JOIN tb_sale sa ON si.sale_id = sa.id AND sa.status = TRUE WHERE LOWER(p.name) LIKE '%arroz%' AND p.status = TRUE AND s.status = TRUE GROUP BY p.name, s.quantidade_atual;
                 
                 """;
     }

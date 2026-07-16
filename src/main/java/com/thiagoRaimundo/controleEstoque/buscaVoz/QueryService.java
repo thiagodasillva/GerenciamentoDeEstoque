@@ -40,11 +40,64 @@ public class QueryService {
             Map<String, Object> novaLinha = new LinkedHashMap<>();
 
             for (Map.Entry<String, Object> coluna : linha.entrySet()) {
-                String chaveAmigavel = coluna.getKey()
-                        .replace("_", " ")
-                        .trim();
+                String chaveOriginal = coluna.getKey();
+                String chaveLower = chaveOriginal.toLowerCase();
+                String chaveAmigavel;
 
-                novaLinha.put(chaveAmigavel, coluna.getValue());
+                if (chaveLower.equals("coalesce")
+                        || chaveLower.equals("case")
+                        || chaveLower.equals("sum")
+                        || chaveLower.equals("count")
+                        || chaveLower.equals("round")
+                        || chaveLower.equals("avg")
+                        || chaveLower.contains("(")
+                        || chaveLower.contains("?")) {
+                    chaveAmigavel = "resultado";
+                } else {
+                    chaveAmigavel = chaveOriginal.replace("_", " ").trim();
+                }
+
+                // 2. FORMATAÇÃO DO VALOR Unidades de Medida
+                Object valorOriginal = coluna.getValue();
+                Object valorFormatado = valorOriginal;
+
+                if (valorOriginal != null) {
+                    String chaveAmigavelLower = chaveAmigavel.toLowerCase();
+
+                    // Regra para DIAS
+                    if (chaveAmigavelLower.contains("dia") || chaveAmigavelLower.contains("dias")) {
+                        if (valorOriginal instanceof Number) {
+                            int valorInteiro = (int) Math.round(((Number) valorOriginal).doubleValue());
+                            valorFormatado = valorInteiro + " dias";
+                        } else {
+                            try {
+                                // Tenta converter caso o valor venha como String
+                                double valorDouble = Double.parseDouble(valorOriginal.toString());
+                                int valorInteiro = (int) Math.round(valorDouble);
+                                valorFormatado = valorInteiro + " dias";
+                            } catch (NumberFormatException e) {
+                                valorFormatado = valorOriginal.toString() + " dias";
+                            }
+                        }
+                    }
+                    // Regra para DINHEIRO
+                    else if (chaveAmigavelLower.contains("valor")
+                            || chaveAmigavelLower.contains("preco")
+                            || chaveAmigavelLower.contains("sub total")
+                            || chaveAmigavelLower.contains("soma total")) {
+
+                        if (valorOriginal instanceof Number) {
+                            double valorNumerico = ((Number) valorOriginal).doubleValue();
+                            valorFormatado = String.format("R$ %.2f", valorNumerico).replace(".", ",");
+                        }
+                    }
+                    // Regra para PESO
+                    //else if (chaveAmigavelLower.contains("quilo") || chaveAmigavelLower.contains("kg")) {
+                    //    valorFormatado = valorOriginal.toString() + " kg";
+                    //}
+                }
+
+                novaLinha.put(chaveAmigavel, valorFormatado);
             }
             resultadoFormatado.add(novaLinha);
         }
