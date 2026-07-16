@@ -96,6 +96,14 @@ public class DatabaseSchemaProvider {
                 - Sempre retorne apenas a query SQL, sem explicações.
                 - Para buscas de texto (nomes de produtos), utilize LOWER(nome_da_coluna) LIKE '%termo%' para ignorar maiúsculas/minúsculas e buscar palavras parciais.
                 - Prefira joins explícitos (INNER JOIN, LEFT JOIN) em vez de joins implícitos.
+                - NUNCA deixe expressões, cálculos ou funções do SQL (como COALESCE, CASE WHEN, SUM, COUNT, ROUND, AVG, etc.) sem um apelido explícito usando 'AS'.
+                - Garanta que as colunas geradas por funções agregadas ou cálculos na busca (usando 'AS') tenham nomes altamente explicativos sobre sua função.
+                                Exemplos de nomenclatura de variáveis esperadas:
+                                  * Para perguntas de duração de estoque: use 'dias_restantes' (ex: AS dias_restantes).
+                                  * Para perguntas de somatórias e totais acumulados: use 'soma_total' (ex: AS soma_total) ou 'valor_total'.
+                                  * Para perguntas de quantidade física total de itens: use 'quantidade_total' ou 'total_itens'.
+                                  * Para buscas de maior/menor elemento: use 'maior_venda' ou 'menor_quantidade'.
+                                  * Evite siglas ou nomes genéricos como 'res', 'total' ou 'qtd'.
                 
                 EXEMPLOS DE CONSULTAS COMUNS:
                                
