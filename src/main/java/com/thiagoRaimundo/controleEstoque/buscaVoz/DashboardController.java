@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/dashboard")
 @CrossOrigin(origins = "*")
 public class DashboardController {
 
@@ -22,7 +22,7 @@ public class DashboardController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @GetMapping("/dashboard/resumo")
+    @GetMapping("/resumo")
     public ResponseEntity<?> obterResumoDashboard() {
         try {
             String sqlProdutos = "SELECT COUNT(*) FROM tb_produto WHERE status = TRUE";
