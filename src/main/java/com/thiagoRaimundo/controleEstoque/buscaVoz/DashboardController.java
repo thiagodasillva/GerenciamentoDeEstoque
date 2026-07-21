@@ -119,4 +119,28 @@ public class DashboardController {
         }
     }
 
+
+    // 7. RELATÓRIO DE VENDAS / CONTAGEM (Para a aba CONTAR)
+    @GetMapping("/vendas")
+    public ResponseEntity<?> obterResumoVendas() {
+        try {
+            String sql = """
+            SELECT s.id, 
+                   TO_CHAR(s.data_venda, 'YYYY-MM-DD HH24:MI') AS data, 
+                   s.valor_total, 
+                   u.name AS vendedor
+            FROM tb_sale s
+            LEFT JOIN tb_user u ON s.user_id = u.id
+            WHERE s.status = TRUE
+            ORDER BY s.data_venda DESC
+            LIMIT 50
+            """;
+            List<Map<String, Object>> vendas = jdbcTemplate.queryForList(sql);
+            return ResponseEntity.ok(vendas);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao buscar histórico de vendas: " + e.getMessage());
+        }
+    }
+
+
 }
