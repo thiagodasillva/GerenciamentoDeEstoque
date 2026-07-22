@@ -91,10 +91,10 @@ public class QueryService {
                             valorFormatado = String.format("R$ %.2f", valorNumerico).replace(".", ",");
                         }
                     }
-                    // Regra para PESO
-                    //else if (chaveAmigavelLower.contains("quilo") || chaveAmigavelLower.contains("kg")) {
-                    //    valorFormatado = valorOriginal.toString() + " kg";
-                    //}
+                    // Regra para porcentagem
+                    else if (chaveAmigavelLower.contains("percentual") || chaveAmigavelLower.contains("porcentagem")) {
+                        valorFormatado = valorOriginal.toString() + " %";
+                    }
                 }
 
                 novaLinha.put(chaveAmigavel, valorFormatado);
